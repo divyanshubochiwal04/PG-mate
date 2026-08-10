@@ -1,5 +1,5 @@
 import { type Kysely, sql } from 'kysely';
-import type { DatabaseSchema } from '../schema/auth.schema';
+import type { DatabaseSchema } from '../schema/combined.schema';
 import type { UserStatus } from '@m-square/domain';
 
 export interface CreateUserData {

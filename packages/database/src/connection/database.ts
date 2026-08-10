@@ -2,7 +2,7 @@ import { Kysely, PostgresDialect, sql } from 'kysely';
 import type { Pool } from 'pg';
 import { closePgPool, createPgPool } from './pool';
 import { logger } from '@m-square/logger';
-import type { DatabaseSchema } from '../schema/auth.schema';
+import type { DatabaseSchema } from '../schema/combined.schema';
 
 export type { DatabaseSchema };
 

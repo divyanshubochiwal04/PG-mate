@@ -1,5 +1,5 @@
 import type { Kysely, Transaction } from 'kysely';
-import type { DatabaseSchema } from '../schema/auth.schema';
+import type { DatabaseSchema } from '../schema/combined.schema';
 
 export interface CreateRefreshTokenData {
   sessionId: string;

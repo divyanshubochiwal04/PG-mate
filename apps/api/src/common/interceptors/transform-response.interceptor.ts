@@ -17,7 +17,7 @@ export class TransformResponseInterceptor<T> implements NestInterceptor<T, ApiRe
         success: true,
         data,
         meta: {
-          requestId: RequestContext.requestId,
+          requestId: RequestContext.requestId ?? 'unknown-request-id',
           timestamp: new Date().toISOString(),
         },
       }))

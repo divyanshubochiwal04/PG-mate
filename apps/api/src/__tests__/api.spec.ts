@@ -8,14 +8,14 @@ import { RequestContext } from '../common/context/request-context';
 import { HealthService } from '../modules/health/health.service';
 
 describe('apps/api - RequestContext', () => {
-  it('should return system as default requestId when not in context store', () => {
-    expect(RequestContext.requestId).toBe('system');
+  it('should return undefined when not in context store', () => {
+    expect(RequestContext.requestId).toBeUndefined();
   });
 
   it('should propagate requestId within store scope', () => {
     RequestContext.run({ requestId: 'req_test_123', correlationId: 'req_test_123' }, () => {
       expect(RequestContext.requestId).toBe('req_test_123');
-      expect(RequestContext.current()?.correlationId).toBe('req_test_123');
+      expect(RequestContext.current?.correlationId).toBe('req_test_123');
     });
   });
 });

@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { randomBytes } from 'crypto';
 import {
   dbService,
+  KyselyOrganizationRepository,
   KyselyPasswordResetTokenRepository,
   KyselyRefreshTokenRepository,
   KyselySessionRepository,
@@ -47,20 +48,39 @@ export class AuthService {
     }
 
     const passwordHash = await hashPassword(dto.password);
-    const user = await userRepo.create({
-      email: normalizedEmail,
-      passwordHash,
-      status: 'ACTIVE',
-    });
 
-    return {
-      id: user.id,
-      email: user.email,
-      status: user.status,
-      emailVerifiedAt: user.emailVerifiedAt?.toISOString(),
-      lastLoginAt: user.lastLoginAt?.toISOString(),
-      createdAt: user.createdAt.toISOString(),
-    };
+    const uow = new KyselyUnitOfWork(dbService.db);
+    return uow.runInTransaction(async (trx) => {
+      const uRepo = new KyselyUserRepository(trx);
+      const orgRepo = new KyselyOrganizationRepository(trx);
+
+      const user = await uRepo.create({
+        email: normalizedEmail,
+        passwordHash,
+        status: 'ACTIVE',
+      });
+
+      // Derive slug from email handle
+      const emailHandle = normalizedEmail.split('@')[0] || 'owner';
+      const rawSlug = `org-${emailHandle}-${user.id.slice(0, 8)}`;
+
+      const org = await orgRepo.createOrganization({
+        name: `${emailHandle.toUpperCase()} Organization`,
+        slug: rawSlug,
+        status: 'ACTIVE',
+      });
+
+      await orgRepo.createMembership(org.id, user.id);
+
+      return {
+        id: user.id,
+        email: user.email,
+        status: user.status,
+        emailVerifiedAt: user.emailVerifiedAt?.toISOString(),
+        lastLoginAt: user.lastLoginAt?.toISOString(),
+        createdAt: user.createdAt.toISOString(),
+      };
+    });
   }
 
   public async login(

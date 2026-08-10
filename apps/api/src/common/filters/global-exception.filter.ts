@@ -16,7 +16,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    const requestId = RequestContext.requestId;
+    const requestId = RequestContext.requestId ?? 'unknown-request-id';
     const timestamp = new Date().toISOString();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;

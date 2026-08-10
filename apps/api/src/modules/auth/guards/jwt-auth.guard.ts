@@ -92,14 +92,7 @@ export class JwtAuthGuard implements CanActivate {
     (request as any).session = sessionDto;
 
     // Update RequestContext
-    RequestContext.run(
-      {
-        requestId: RequestContext.requestId,
-        correlationId: RequestContext.requestId,
-        userId: user.id,
-      },
-      () => true
-    );
+    RequestContext.setUserId(user.id);
 
     return true;
   }

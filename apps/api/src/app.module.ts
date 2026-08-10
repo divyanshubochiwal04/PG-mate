@@ -3,18 +3,20 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { TenantModule } from './modules/tenant/tenant.module';
 import { RequestContextMiddleware } from './common/context/request-context.middleware';
 
 @Module({
   imports: [
     ThrottlerModule.forRoot([
       {
-        ttl: 60000, // 1 minute
-        limit: 100, // 100 requests per min global IP rate limit
+        ttl: 60000,
+        limit: 100,
       },
     ]),
     HealthModule,
     AuthModule,
+    TenantModule,
   ],
   providers: [
     {

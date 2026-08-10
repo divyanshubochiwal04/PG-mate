@@ -2,6 +2,7 @@ import { type Kysely, Migrator, NO_MIGRATIONS } from 'kysely';
 import type { DatabaseSchema } from '../connection/database';
 import { logger } from '@m-square/logger';
 import * as m00001 from './00001_auth_schema';
+import * as m00002 from './00002_tenant_schema';
 
 export class MigrationService {
   constructor(private readonly db: Kysely<DatabaseSchema>) {}
@@ -12,6 +13,7 @@ export class MigrationService {
       provider: {
         getMigrations: async () => ({
           '00001_auth_schema': m00001,
+          '00002_tenant_schema': m00002,
         }),
       },
     });

@@ -42,7 +42,7 @@ export interface PasswordResetTokensTable {
   created_at: Generated<Date>;
 }
 
-export interface DatabaseSchema {
+export interface AuthDatabaseSchema {
   users: UsersTable;
   user_sessions: UserSessionsTable;
   refresh_tokens: RefreshTokensTable;
