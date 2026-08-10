@@ -13,6 +13,7 @@ const JWT_ALGORITHM: jwt.Algorithm = 'HS256';
  * Generates a short-lived JWT access token signed with HS256.
  * Expiry comes from validated config (default: 15 minutes).
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function generateAccessToken(payload: Record<string, any>): string {
   const options: jwt.SignOptions = {
     algorithm: JWT_ALGORITHM,

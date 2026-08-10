@@ -7,13 +7,26 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "test": "turbo run test",
-    "lint": "turbo run lint",
+    "lint": "eslint packages --ext .ts --max-warnings=0",
+    "lint:fix": "eslint packages --ext .ts --fix",
+    "format": "prettier --check \"packages/**/*.ts\"",
+    "format:fix": "prettier --write \"packages/**/*.ts\"",
+    "typecheck": "turbo run typecheck",
+    "loc": "node scripts/check-loc.mjs",
     "clean": "turbo run clean && rimraf node_modules **/node_modules **/dist **/build"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-prettier": "^5.5.6",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "prettier": "^3.9.6",
     "rimraf": "^5.0.5",
     "turbo": "^1.12.4",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.67.0"
   },
   "engines": {
     "node": ">=18.0.0"

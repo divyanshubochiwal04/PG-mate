@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { createAppLogger } from '../index';
+import { redactSensitiveData } from '../redact';
 
 describe('@m-square/logger - redactObject', () => {
   function getLogger() {
@@ -18,7 +19,6 @@ describe('@m-square/logger - redactObject', () => {
 // ---------------------------------------------------------------------------
 // Direct unit tests for redaction logic (extracted for testability)
 // ---------------------------------------------------------------------------
-import { redactSensitiveData } from '../redact';
 
 describe('@m-square/logger - redactSensitiveData', () => {
   it('should redact top-level password field', () => {
@@ -40,6 +40,7 @@ describe('@m-square/logger - redactSensitiveData', () => {
   });
 
   it('should handle circular references without crashing', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const obj: any = { name: 'test' };
     obj.self = obj; // circular reference
     expect(() => redactSensitiveData(obj)).not.toThrow();

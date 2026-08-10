@@ -15,20 +15,14 @@ const developmentFormat = winston.format.combine(
   })
 );
 
-const productionFormat = winston.format.combine(
-  winston.format.timestamp(),
-  winston.format.json()
-);
+const productionFormat = winston.format.combine(winston.format.timestamp(), winston.format.json());
 
 /**
  * createAppLogger — factory allowing configuration injection.
  * Exported for testing purposes so tests can pass explicit options
  * without relying on process.env at module-load time.
  */
-export function createAppLogger(options?: {
-  nodeEnv?: string;
-  logLevel?: string;
-}): winston.Logger {
+export function createAppLogger(options?: { nodeEnv?: string; logLevel?: string }): winston.Logger {
   const nodeEnv = options?.nodeEnv ?? process.env['NODE_ENV'] ?? 'development';
   const logLevel = options?.logLevel ?? process.env['LOG_LEVEL'] ?? 'info';
   const isDevelopment = nodeEnv !== 'production';

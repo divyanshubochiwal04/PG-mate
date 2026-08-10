@@ -1,18 +1,18 @@
-import { describe, it, expect } from 'vitest';
-
-// Set up required env vars before importing modules that call config singleton
-// (password.ts and token.ts import @m-square/config which loads process.env)
+// Set up required env vars before importing modules that call config singleton.
+// password.ts and token.ts import @m-square/config which reads process.env at load time.
 process.env['DATABASE_URL'] = 'postgresql://postgres:postgres@localhost:5432/m_square_test';
 process.env['JWT_SECRET'] = 'test-secret-for-unit-tests-at-least-32-chars!!';
 
+import * as jsonwebtoken from 'jsonwebtoken';
+import { describe, expect, it } from 'vitest';
+import { constantTimeCompare } from '../crypto';
 import { hashPassword, verifyPassword } from '../password';
 import {
   generateAccessToken,
-  verifyAccessToken,
   generateRefreshToken,
   hashRefreshToken,
+  verifyAccessToken,
 } from '../token';
-import { constantTimeCompare } from '../crypto';
 
 // ============================================================================
 // Password Hashing Tests
@@ -77,10 +77,11 @@ describe('generateAccessToken / verifyAccessToken', () => {
   });
 
   it('should throw on a token signed with a different secret', () => {
-    const jwt = require('jsonwebtoken');
-    const foreignToken = jwt.sign({ userId: '123' }, 'completely-different-secret-32chars!!', {
-      algorithm: 'HS256',
-    });
+    const foreignToken = jsonwebtoken.sign(
+      { userId: '123' },
+      'completely-different-secret-32chars!!',
+      { algorithm: 'HS256' }
+    );
     expect(() => verifyAccessToken(foreignToken)).toThrow();
   });
 });

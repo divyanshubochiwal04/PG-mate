@@ -34,7 +34,10 @@ const configSchema = z.object({
   // Minimum 32 characters enforced (256 bits) per NIST recommendation for HMAC-SHA256.
   JWT_SECRET: z
     .string({ required_error: 'JWT_SECRET is required. Generate with: openssl rand -base64 32' })
-    .min(32, 'JWT_SECRET must be at least 32 characters (256 bits). Generate with: openssl rand -base64 32'),
+    .min(
+      32,
+      'JWT_SECRET must be at least 32 characters (256 bits). Generate with: openssl rand -base64 32'
+    ),
   JWT_ACCESS_EXPIRY: z.string().default('15m'),
   JWT_REFRESH_EXPIRY: z.string().default('7d'),
 
@@ -47,15 +50,30 @@ const configSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
 
   // --- Rate Limiting ---
-  RATE_LIMIT_TTL: z.string().transform((val) => parseInt(val, 10)).default('60'),
-  RATE_LIMIT_MAX: z.string().transform((val) => parseInt(val, 10)).default('100'),
+  RATE_LIMIT_TTL: z
+    .string()
+    .transform((val) => parseInt(val, 10))
+    .default('60'),
+  RATE_LIMIT_MAX: z
+    .string()
+    .transform((val) => parseInt(val, 10))
+    .default('100'),
 
   // --- Argon2id Password Hashing Parameters ---
   // These values allow tuning without code changes as hardware scales.
   // Defaults meet OWASP recommendations for Argon2id.
-  ARGON2_MEMORY_COST: z.string().transform((val) => parseInt(val, 10)).default('65536'), // 64 MB
-  ARGON2_TIME_COST: z.string().transform((val) => parseInt(val, 10)).default('3'),
-  ARGON2_PARALLELISM: z.string().transform((val) => parseInt(val, 10)).default('4'),
+  ARGON2_MEMORY_COST: z
+    .string()
+    .transform((val) => parseInt(val, 10))
+    .default('65536'), // 64 MB
+  ARGON2_TIME_COST: z
+    .string()
+    .transform((val) => parseInt(val, 10))
+    .default('3'),
+  ARGON2_PARALLELISM: z
+    .string()
+    .transform((val) => parseInt(val, 10))
+    .default('4'),
 });
 
 export type Config = z.infer<typeof configSchema>;
@@ -92,4 +110,3 @@ try {
 }
 
 export const config = _config;
-

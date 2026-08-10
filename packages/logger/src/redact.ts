@@ -34,6 +34,7 @@ const SENSITIVE_KEYS = new Set([
  * Uses a WeakSet to detect and break circular references safely.
  * Exported for direct unit testing.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function redactSensitiveData(obj: any, visited = new WeakSet()): any {
   if (obj === null || obj === undefined || typeof obj !== 'object') {
     return obj;
@@ -58,6 +59,7 @@ export function redactSensitiveData(obj: any, visited = new WeakSet()): any {
     return obj.map((item) => redactSensitiveData(item, visited));
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const redacted: Record<string, any> = {};
   for (const key of Object.keys(obj)) {
     if (SENSITIVE_KEYS.has(key.toLowerCase())) {
