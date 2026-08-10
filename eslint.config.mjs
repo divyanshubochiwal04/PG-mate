@@ -79,6 +79,17 @@ export default tseslint.config(
   },
 
   // -------------------------------------------------------------------------
+  // NestJS App Override: turn off consistent-type-imports to preserve runtime
+  // class constructors required for NestJS Dependency Injection metadata reflection.
+  // -------------------------------------------------------------------------
+  {
+    files: ['apps/api/**/*.ts'],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': 'off',
+    },
+  },
+
+  // -------------------------------------------------------------------------
   // Prettier — must be last to override formatting rules
   // -------------------------------------------------------------------------
   prettier,
