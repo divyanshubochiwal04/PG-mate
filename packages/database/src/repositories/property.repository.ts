@@ -68,9 +68,17 @@ export class KyselyPropertyRepository {
   ): Promise<PaginatedResult<PropertyRow>> {
     const { offset, limit } = calculatePaginationBounds(params.page, params.pageSize);
 
+    // ── Item query — filtered for pagination
     let query = this.db
       .selectFrom('properties')
       .selectAll()
+      .where('organization_id', '=', organizationId);
+
+    // ── Count query — must apply identical predicates so that pagination.total
+    //    reflects the filtered result set, not the unfiltered tenant dataset (P1-A fix)
+    let countQuery = this.db
+      .selectFrom('properties')
+      .select(this.db.fn.count<string>('id').as('total'))
       .where('organization_id', '=', organizationId);
 
     if (search && search.trim().length > 0) {
@@ -78,18 +86,17 @@ export class KyselyPropertyRepository {
       query = query.where((eb) =>
         eb.or([eb('name', 'ilike', term), eb('code', 'ilike', term), eb('city', 'ilike', term)])
       );
+      countQuery = countQuery.where((eb) =>
+        eb.or([eb('name', 'ilike', term), eb('code', 'ilike', term), eb('city', 'ilike', term)])
+      );
     }
 
     if (status && status.trim().length > 0) {
       query = query.where('status', '=', status.trim());
+      countQuery = countQuery.where('status', '=', status.trim());
     }
 
-    const countResult = await this.db
-      .selectFrom('properties')
-      .select(this.db.fn.count<string>('id').as('total'))
-      .where('organization_id', '=', organizationId)
-      .executeTakeFirstOrThrow();
-
+    const countResult = await countQuery.executeTakeFirstOrThrow();
     const total = parseInt(countResult.total, 10);
 
     const rows = await query.orderBy('created_at', 'desc').offset(offset).limit(limit).execute();

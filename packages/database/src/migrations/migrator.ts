@@ -4,6 +4,8 @@ import { logger } from '@m-square/logger';
 import * as m00001 from './00001_auth_schema';
 import * as m00002 from './00002_tenant_schema';
 import * as m00003 from './00003_inventory_schema';
+import * as m00004 from './00004_resident_allocation_schema';
+import * as m00005 from './00005_m6_integrity_hardening';
 
 export class MigrationService {
   constructor(private readonly db: Kysely<DatabaseSchema>) {}
@@ -16,6 +18,8 @@ export class MigrationService {
           '00001_auth_schema': m00001,
           '00002_tenant_schema': m00002,
           '00003_inventory_schema': m00003,
+          '00004_resident_allocation_schema': m00004,
+          '00005_m6_integrity_hardening': m00005,
         }),
       },
     });

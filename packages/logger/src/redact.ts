@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// Sensitive key registry — all keys matched case-insensitively.
+// Sensitive & PII key registry — all keys matched case-insensitively.
 // Any log field whose key matches will be replaced with '[REDACTED]'.
 // ---------------------------------------------------------------------------
 const SENSITIVE_KEYS = new Set([
@@ -27,6 +27,17 @@ const SENSITIVE_KEYS = new Set([
   'cvv',
   'cvc',
   'pin',
+  // Resident PII Redaction Additions (M6)
+  'phone',
+  'alternate_phone',
+  'alternatephone',
+  'email',
+  'date_of_birth',
+  'dateofbirth',
+  'address_line1',
+  'addressline1',
+  'emergency_contacts',
+  'emergencycontacts',
 ]);
 
 /**
@@ -68,5 +79,13 @@ export function redactSensitiveData(obj: any, visited = new WeakSet()): any {
       redacted[key] = redactSensitiveData(obj[key], visited);
     }
   }
+
+  // Preserve Symbol properties (e.g. Winston's internal level/message symbols)
+  const symbols = Object.getOwnPropertySymbols(obj);
+  for (const sym of symbols) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (redacted as any)[sym] = (obj as any)[sym];
+  }
+
   return redacted;
 }

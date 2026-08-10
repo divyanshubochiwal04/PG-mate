@@ -31,8 +31,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Register a new user account' })
   @SwaggerResponse({ status: 201, description: 'User successfully registered' })
   @SwaggerResponse({ status: 400, description: 'Validation failure or duplicate user' })
-  async register(@Body() dto: RegisterDto): Promise<UserDto> {
-    return this.authService.register(dto);
+  async register(@Body() dto: RegisterDto, @Req() req: Request): Promise<UserDto> {
+    const body = (req.body || {}) as Record<string, unknown>;
+    const payload: RegisterDto = {
+      email: (dto?.email || body['email'] || body['username']) as string,
+      password: (dto?.password || body['password']) as string,
+    };
+    return this.authService.register(payload);
   }
 
   @Public()
@@ -42,9 +47,14 @@ export class AuthController {
   @SwaggerResponse({ status: 200, description: 'Login successful' })
   @SwaggerResponse({ status: 401, description: 'Invalid email or password' })
   async login(@Body() dto: LoginDto, @Req() req: Request): Promise<AuthResponseDto> {
+    const body = (req.body || {}) as Record<string, unknown>;
+    const payload: LoginDto = {
+      email: (dto?.email || body['email'] || body['username']) as string,
+      password: (dto?.password || body['password']) as string,
+    };
     const ip = req.ip || (req.headers['x-forwarded-for'] as string) || undefined;
     const userAgent = req.headers['user-agent'] || undefined;
-    return this.authService.login(dto, ip, userAgent);
+    return this.authService.login(payload, ip, userAgent);
   }
 
   @Public()

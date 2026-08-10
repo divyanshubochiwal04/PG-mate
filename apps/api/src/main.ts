@@ -38,9 +38,8 @@ async function bootstrap(): Promise<void> {
   // Input Validation Pipe
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
       transform: true,
+      whitelist: true,
     })
   );
 

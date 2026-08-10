@@ -1,9 +1,17 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { InventoryService } from '../modules/inventory/inventory.service';
 
 describe('apps/api - InventoryService', () => {
   it('should instantiate InventoryService correctly', () => {
-    const service = new InventoryService();
+    const mockPropertyBuildingService = vi.fn() as never;
+    const mockFloorRoomBedService = vi.fn() as never;
+    const mockFacilityService = vi.fn() as never;
+
+    const service = new InventoryService(
+      mockPropertyBuildingService,
+      mockFloorRoomBedService,
+      mockFacilityService
+    );
     expect(service).toBeDefined();
   });
 });

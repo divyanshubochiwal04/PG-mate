@@ -11,6 +11,13 @@ import type {
   RoomFacilitiesTable,
   RoomsTable,
 } from './inventory.schema';
+import type {
+  BedAllocationsTable,
+  EmergencyContactsTable,
+  OrganizationCountersTable,
+  ResidentsTable,
+  StaysTable,
+} from './resident-allocation.schema';
 
 export interface InventoryDatabaseSchema {
   properties: PropertiesTable;
@@ -24,4 +31,15 @@ export interface InventoryDatabaseSchema {
   room_facilities: RoomFacilitiesTable;
 }
 
-export type DatabaseSchema = AuthDatabaseSchema & TenantDatabaseSchema & InventoryDatabaseSchema;
+export interface ResidentDatabaseSchema {
+  organization_counters: OrganizationCountersTable;
+  residents: ResidentsTable;
+  emergency_contacts: EmergencyContactsTable;
+  stays: StaysTable;
+  bed_allocations: BedAllocationsTable;
+}
+
+export type DatabaseSchema = AuthDatabaseSchema &
+  TenantDatabaseSchema &
+  InventoryDatabaseSchema &
+  ResidentDatabaseSchema;

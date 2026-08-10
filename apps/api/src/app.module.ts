@@ -5,6 +5,7 @@ import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TenantModule } from './modules/tenant/tenant.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
+import { ResidentModule } from './modules/resident/resident.module';
 import { RequestContextMiddleware } from './common/context/request-context.middleware';
 
 @Module({
@@ -19,6 +20,7 @@ import { RequestContextMiddleware } from './common/context/request-context.middl
     AuthModule,
     TenantModule,
     InventoryModule,
+    ResidentModule,
   ],
   providers: [
     {

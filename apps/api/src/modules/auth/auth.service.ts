@@ -36,8 +36,10 @@ export class AuthService {
   constructor(private readonly emailService: EmailService) {}
 
   public async register(dto: RegisterDto): Promise<UserDto> {
-    const normalizedEmail = PasswordPolicy.normalizeEmail(dto.email);
-    PasswordPolicy.validate(dto.password);
+    const rawEmail = dto?.email || (dto as unknown as Record<string, unknown>)?.[ 'email' ];
+    const rawPassword = dto?.password || (dto as unknown as Record<string, unknown>)?.[ 'password' ];
+    const normalizedEmail = PasswordPolicy.normalizeEmail(rawEmail as string);
+    PasswordPolicy.validate(rawPassword as string);
 
     const userRepo = new KyselyUserRepository(dbService.db);
     const existing = await userRepo.findByEmail(normalizedEmail);
@@ -47,7 +49,7 @@ export class AuthService {
       throw new EntityConflictError('Account registration failed');
     }
 
-    const passwordHash = await hashPassword(dto.password);
+    const passwordHash = await hashPassword(rawPassword as string);
 
     const uow = new KyselyUnitOfWork(dbService.db);
     return uow.runInTransaction(async (trx) => {
@@ -88,17 +90,19 @@ export class AuthService {
     ipAddress?: string,
     userAgent?: string
   ): Promise<AuthResponseDto> {
-    const normalizedEmail = PasswordPolicy.normalizeEmail(dto.email);
+    const rawEmail = dto?.email || (dto as unknown as Record<string, unknown>)?.[ 'email' ];
+    const rawPassword = dto?.password || (dto as unknown as Record<string, unknown>)?.[ 'password' ];
+    const normalizedEmail = PasswordPolicy.normalizeEmail(rawEmail as string);
     const userRepo = new KyselyUserRepository(dbService.db);
     const user = await userRepo.findByEmail(normalizedEmail);
 
     if (!user || user.status !== 'ACTIVE') {
       // Execute dummy hash comparison to normalize execution time
-      await verifyPassword(DUMMY_ARGON2_HASH, dto.password);
+      await verifyPassword(DUMMY_ARGON2_HASH, rawPassword as string);
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const isValidPassword = await verifyPassword(user.passwordHash, dto.password);
+    const isValidPassword = await verifyPassword(user.passwordHash, rawPassword as string);
     if (!isValidPassword) {
       throw new UnauthorizedException('Invalid email or password');
     }

@@ -30,17 +30,40 @@ export interface UpdateBedData {
 export class KyselyBedRepository {
   constructor(private readonly db: Kysely<DatabaseSchema>) {}
 
+  private getExecutor(trx?: Transaction<DatabaseSchema>) {
+    return trx && typeof (trx as unknown as Record<string, unknown>).selectFrom === 'function'
+      ? trx
+      : this.db;
+  }
+
   public async findByIdForOrganization(
     id: string,
     organizationId: string,
     trx?: Transaction<DatabaseSchema>
   ): Promise<BedRow | null> {
-    const executor = trx || this.db;
+    const executor = this.getExecutor(trx);
     const row = await executor
       .selectFrom('beds')
       .selectAll()
       .where('id', '=', id)
       .where('organization_id', '=', organizationId)
+      .executeTakeFirst();
+
+    return (row as BedRow) || null;
+  }
+
+  public async findByIdForUpdate(
+    id: string,
+    organizationId: string,
+    trx?: Transaction<DatabaseSchema>
+  ): Promise<BedRow | null> {
+    const executor = this.getExecutor(trx);
+    const row = await executor
+      .selectFrom('beds')
+      .selectAll()
+      .where('id', '=', id)
+      .where('organization_id', '=', organizationId)
+      .forUpdate()
       .executeTakeFirst();
 
     return (row as BedRow) || null;
