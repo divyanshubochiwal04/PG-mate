@@ -3,3 +3,8 @@ export * from './connection/database';
 export * from './transactions/unit-of-work';
 export * from './migrations/migrator';
 export * from './utils/sort-whitelist';
+export * from './schema/auth.schema';
+export * from './repositories/user.repository';
+export * from './repositories/session.repository';
+export * from './repositories/refresh-token.repository';
+export * from './repositories/password-reset-token.repository';

@@ -2,13 +2,9 @@ import { Kysely, PostgresDialect, sql } from 'kysely';
 import type { Pool } from 'pg';
 import { closePgPool, createPgPool } from './pool';
 import { logger } from '@m-square/logger';
+import type { DatabaseSchema } from '../schema/auth.schema';
 
-/**
- * Foundation database schema interface.
- * Feature tables will be declared here in future domain milestones.
- */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface DatabaseSchema {}
+export type { DatabaseSchema };
 
 export class DatabaseService {
   private kyselyInstance: Kysely<DatabaseSchema> | null = null;

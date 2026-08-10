@@ -1,22 +1,28 @@
 import { type Kysely, Migrator, NO_MIGRATIONS } from 'kysely';
 import type { DatabaseSchema } from '../connection/database';
 import { logger } from '@m-square/logger';
+import * as m00001 from './00001_auth_schema';
 
 export class MigrationService {
   constructor(private readonly db: Kysely<DatabaseSchema>) {}
+
+  private getMigrator(): Migrator {
+    return new Migrator({
+      db: this.db,
+      provider: {
+        getMigrations: async () => ({
+          '00001_auth_schema': m00001,
+        }),
+      },
+    });
+  }
 
   /**
    * Executes all pending `up` migrations in deterministic order.
    * Recommended for production and CI/CD pipelines.
    */
   public async migrateToLatest(): Promise<void> {
-    const migrator = new Migrator({
-      db: this.db,
-      provider: {
-        getMigrations: async () => ({}), // Foundation migration provider placeholder
-      },
-    });
-
+    const migrator = this.getMigrator();
     const { error, results } = await migrator.migrateToLatest();
 
     results?.forEach((it) => {
@@ -38,13 +44,7 @@ export class MigrationService {
    * NEVER use in production environments (production policy is forward-only).
    */
   public async rollbackDevelopmentStep(): Promise<void> {
-    const migrator = new Migrator({
-      db: this.db,
-      provider: {
-        getMigrations: async () => ({}),
-      },
-    });
-
+    const migrator = this.getMigrator();
     const { error, results } = await migrator.migrateDown();
 
     results?.forEach((it) => {
@@ -61,13 +61,7 @@ export class MigrationService {
    * Reverts all migrations (testing environment reset only).
    */
   public async resetTestDatabase(): Promise<void> {
-    const migrator = new Migrator({
-      db: this.db,
-      provider: {
-        getMigrations: async () => ({}),
-      },
-    });
-
+    const migrator = this.getMigrator();
     await migrator.migrateTo(NO_MIGRATIONS);
   }
 }
