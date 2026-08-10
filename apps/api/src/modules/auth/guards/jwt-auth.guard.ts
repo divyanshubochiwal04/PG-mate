@@ -4,7 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import type { Reflector } from '@nestjs/core';
+import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { verifyAccessToken } from '@m-square/security';
 import { dbService, KyselySessionRepository, KyselyUserRepository } from '@m-square/database';

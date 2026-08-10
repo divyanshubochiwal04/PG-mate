@@ -18,7 +18,7 @@ import {
   verifyPassword,
 } from '@m-square/security';
 import { logger } from '@m-square/logger';
-import type { EmailService } from './services/email.service';
+import { EmailService } from './services/email.service';
 import type { RegisterDto } from './dto/register.dto';
 import type { LoginDto } from './dto/login.dto';
 import type { RefreshDto } from './dto/refresh.dto';

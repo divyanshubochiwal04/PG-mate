@@ -10,6 +10,8 @@ export interface PaginationQuery {
   sortOrder?: 'asc' | 'desc';
 }
 
+export type PaginationParams = PaginationQuery;
+
 /**
  * Metadata for paginated list responses.
  */
@@ -45,5 +47,29 @@ export function buildPaginationMeta(total: number, page = 1, pageSize = 20): Pag
     totalPages,
     hasNext: safePage < totalPages,
     hasPrevious: safePage > 1,
+  };
+}
+
+export function calculatePaginationBounds(
+  page = 1,
+  pageSize = 20
+): { offset: number; limit: number } {
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.max(1, Math.min(100, pageSize));
+  return {
+    offset: (safePage - 1) * safePageSize,
+    limit: safePageSize,
+  };
+}
+
+export function createPaginatedResult<T>(
+  items: T[],
+  total: number,
+  page = 1,
+  pageSize = 20
+): PaginatedResult<T> {
+  return {
+    items,
+    pagination: buildPaginationMeta(total, page, pageSize),
   };
 }

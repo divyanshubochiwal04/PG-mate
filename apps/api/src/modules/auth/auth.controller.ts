@@ -6,7 +6,7 @@ import {
   ApiResponse as SwaggerResponse,
 } from '@nestjs/swagger';
 import type { Request } from 'express';
-import type { AuthService } from './auth.service';
+import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { CurrentSession } from './decorators/current-session.decorator';

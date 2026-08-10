@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@m-square/config": "workspace:*",
+    "@m-square/contracts": "workspace:*",
     "@m-square/domain": "workspace:*",
     "@m-square/logger": "workspace:*",
     "kysely": "^0.27.2",

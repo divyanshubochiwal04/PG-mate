@@ -5,10 +5,10 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import type { Reflector } from '@nestjs/core';
+import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../../auth/decorators/public.decorator';
 import { RequestContext } from '../../../common/context/request-context';
-import type { TenantContextService } from '../services/tenant-context.service';
+import { TenantContextService } from '../services/tenant-context.service';
 import type { OrganizationDto } from '@m-square/contracts';
 
 @Injectable()

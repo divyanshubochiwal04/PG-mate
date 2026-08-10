@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { HealthModule } from './modules/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { TenantModule } from './modules/tenant/tenant.module';
+import { InventoryModule } from './modules/inventory/inventory.module';
 import { RequestContextMiddleware } from './common/context/request-context.middleware';
 
 @Module({
@@ -17,6 +18,7 @@ import { RequestContextMiddleware } from './common/context/request-context.middl
     HealthModule,
     AuthModule,
     TenantModule,
+    InventoryModule,
   ],
   providers: [
     {

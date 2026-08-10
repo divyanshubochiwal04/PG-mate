@@ -167,6 +167,9 @@ importers:
       '@m-square/config':
         specifier: workspace:*
         version: link:../config
+      '@m-square/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@m-square/domain':
         specifier: workspace:*
         version: link:../domain
