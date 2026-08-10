@@ -9,6 +9,7 @@ build/
 out/
 .turbo/
 web-build/
+*.tsbuildinfo
 
 # Expo / React Native specific
 .expo/
