@@ -1,0 +1,22 @@
+{
+  "name": "m-square-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Enterprise-grade PG and Hostel Management System",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean && rimraf node_modules **/node_modules **/dist **/build"
+  },
+  "devDependencies": {
+    "rimraf": "^5.0.5",
+    "turbo": "^1.12.4",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "pnpm@8.15.4"
+}
