@@ -14,8 +14,10 @@ import { RequestContextMiddleware } from './common/context/request-context.middl
 import { ReportingModule } from './modules/reporting/reporting.module';
 import { NotificationModule } from './modules/notifications/notification.module';
 import { TaskModule } from './modules/tasks/task.module';
+import { AppController, ApiV1Controller } from './app.controller';
 
 @Module({
+  controllers: [AppController, ApiV1Controller],
   imports: [
     ThrottlerModule.forRoot([
       {

@@ -46,7 +46,9 @@ async function bootstrap(): Promise<void> {
   app.enableShutdownHooks();
 
   // API Versioning (/api/v1/...)
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api', {
+    exclude: ['/', 'api'],
+  });
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
