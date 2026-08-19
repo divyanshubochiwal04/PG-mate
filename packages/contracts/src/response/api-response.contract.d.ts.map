@@ -1,0 +1,1 @@
+{"version":3,"file":"api-response.contract.d.ts","sourceRoot":"","sources":["api-response.contract.ts"],"names":[],"mappings":"AAAA;;GAEG;AACH,MAAM,WAAW,eAAe;IAC9B,SAAS,EAAE,MAAM,CAAC;IAClB,SAAS,EAAE,MAAM,CAAC;CACnB;AAED;;GAEG;AACH,MAAM,WAAW,WAAW,CAAC,CAAC,GAAG,OAAO;IACtC,OAAO,EAAE,IAAI,CAAC;IACd,IAAI,EAAE,CAAC,CAAC;IACR,IAAI,EAAE,eAAe,CAAC;CACvB"}
