@@ -2,9 +2,11 @@
   "name": "m-square-monorepo",
   "version": "1.0.0",
   "private": true,
+  "main": "index.js",
   "description": "Enterprise-grade PG and Hostel Management System",
   "scripts": {
-    "build": "turbo run build",
+    "start": "node index.js",
+    "build": "pnpm --filter @m-square/config build && pnpm --filter @m-square/logger build && pnpm --filter @m-square/domain build && pnpm --filter @m-square/contracts build && pnpm --filter @m-square/security build && pnpm --filter @m-square/database build && pnpm --filter @m-square/api build",
     "build:api": "pnpm --filter @m-square/config build && pnpm --filter @m-square/logger build && pnpm --filter @m-square/domain build && pnpm --filter @m-square/contracts build && pnpm --filter @m-square/security build && pnpm --filter @m-square/database build && pnpm --filter @m-square/api build",
     "dev": "turbo run dev",
     "test": "turbo run test",
