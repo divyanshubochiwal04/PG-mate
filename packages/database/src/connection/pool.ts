@@ -9,11 +9,19 @@ export function createPgPool(overrideConfig?: PoolConfig): Pool {
     return poolInstance;
   }
 
+  const isRemote =
+    config.DATABASE_URL.includes('supabase') ||
+    config.DATABASE_URL.includes('pooler') ||
+    config.DATABASE_URL.includes('onrender') ||
+    config.DATABASE_URL.includes('sslmode') ||
+    process.env['NODE_ENV'] === 'production';
+
   const defaultPoolConfig: PoolConfig = {
     connectionString: config.DATABASE_URL,
     max: 20, // Maximum pool connections
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: 10000,
+    ...(isRemote ? { ssl: { rejectUnauthorized: false } } : {}),
   };
 
   poolInstance = new Pool(overrideConfig ?? defaultPoolConfig);
