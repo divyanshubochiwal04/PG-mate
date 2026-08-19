@@ -47,3 +47,9 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.swp
+
+# Documentation & Internal Reports (Keep only root README.md)
+*.md
+!README.md
+docs/
+
