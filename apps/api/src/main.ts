@@ -37,9 +37,15 @@ async function bootstrap(): Promise<void> {
   app.use(helmet());
 
   // CORS Configuration
+  const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim())
+    : true; // In development/open mode, allow all valid origins
+
   app.enableCors({
-    origin: true,
+    origin: allowedOrigins,
     credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'x-request-id', 'x-tenant-id'],
   });
 
   // Graceful Shutdown Hooks
@@ -67,9 +73,7 @@ async function bootstrap(): Promise<void> {
   );
 
   // Swagger Documentation Setup
-  if (config.NODE_ENV !== 'production') {
-    setupSwagger(app);
-  }
+  setupSwagger(app);
 
   // Bind to Port (API app concern)
   const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -77,9 +81,7 @@ async function bootstrap(): Promise<void> {
   await app.listen(port, host);
 
   logger.info(`🚀 API Server running on http://${host}:${port} [env=${config.NODE_ENV}]`);
-  if (config.NODE_ENV !== 'production') {
-    logger.info(`📚 Swagger Documentation available at http://localhost:${port}/api/docs`);
-  }
+  logger.info(`📚 Swagger Documentation available at http://${host}:${port}/api/docs`);
 }
 
 void bootstrap();
