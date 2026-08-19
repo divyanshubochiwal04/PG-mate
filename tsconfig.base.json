@@ -15,7 +15,6 @@
     "sourceMap": true,
     "isolatedModules": false,
     "resolveJsonModule": true,
-    "incremental": true,
-    "preserveSymlinks": true
+    "incremental": true
   }
 }
