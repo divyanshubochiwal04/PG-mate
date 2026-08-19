@@ -12,7 +12,9 @@ export abstract class DomainError extends Error {
   ) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
-    Error.captureStackTrace(this, this.constructor);
+    if (typeof (Error as unknown as { captureStackTrace?: (target: object, constructorOpt?: unknown) => void }).captureStackTrace === 'function') {
+      (Error as unknown as { captureStackTrace: (target: object, constructorOpt?: unknown) => void }).captureStackTrace(this, this.constructor);
+    }
   }
 }
 
