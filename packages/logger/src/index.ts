@@ -2,14 +2,15 @@ import * as winston from 'winston';
 import { redactSensitiveData } from './redact';
 
 // Winston format plugin that applies redaction before serialization
-const redactFormat = winston.format((info) => {
-  return redactSensitiveData(info);
+const redactFormat = winston.format((info: winston.Logform.TransformableInfo) => {
+  return redactSensitiveData(info as Record<string, unknown>) as winston.Logform.TransformableInfo;
 });
 
 const developmentFormat = winston.format.combine(
   winston.format.colorize(),
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  winston.format.printf(({ timestamp, level, message, ...meta }) => {
+  winston.format.printf((info: winston.Logform.TransformableInfo) => {
+    const { timestamp, level, message, ...meta } = info as { timestamp?: string; level?: string; message?: string } & Record<string, unknown>;
     const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
     return `[${timestamp}] ${level}: ${message}${metaStr}`;
   })

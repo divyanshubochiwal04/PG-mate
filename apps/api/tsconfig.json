@@ -3,15 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": ".",
-    "paths": {
-      "@m-square/config": ["../../packages/config/dist/index.d.ts", "../../packages/config/dist/index.js"],
-      "@m-square/contracts": ["../../packages/contracts/dist/index.d.ts", "../../packages/contracts/dist/index.js"],
-      "@m-square/domain": ["../../packages/domain/dist/index.d.ts", "../../packages/domain/dist/index.js"],
-      "@m-square/logger": ["../../packages/logger/dist/index.d.ts", "../../packages/logger/dist/index.js"],
-      "@m-square/security": ["../../packages/security/dist/index.d.ts", "../../packages/security/dist/index.js"],
-      "@m-square/database": ["../../packages/database/dist/index.d.ts", "../../packages/database/dist/index.js"]
-    }
+    "typeRoots": ["../../node_modules/@types", "./node_modules/@types"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "src/**/__tests__/**", "src/**/*.spec.ts", "src/**/*.test.ts"]
