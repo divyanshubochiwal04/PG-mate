@@ -24,6 +24,17 @@ export function createPgPool(overrideConfig?: PoolConfig): Pool {
     ...(isRemote ? { ssl: { rejectUnauthorized: false } } : {}),
   };
 
+  try {
+    const parsed = new URL(config.DATABASE_URL.replace(/^postgres(ql)?:\/\//, 'http://'));
+    logger.info('Database connection target configured', {
+      host: parsed.hostname,
+      port: parsed.port || '5432',
+      ssl: isRemote,
+    });
+  } catch {
+    // URL parsing failed, skip non-fatal diagnostic
+  }
+
   poolInstance = new Pool(overrideConfig ?? defaultPoolConfig);
 
   poolInstance.on('error', (err) => {
