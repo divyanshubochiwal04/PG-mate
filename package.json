@@ -5,6 +5,7 @@
   "description": "Enterprise-grade PG and Hostel Management System",
   "scripts": {
     "build": "turbo run build",
+    "build:api": "turbo run build --filter=@m-square/api...",
     "dev": "turbo run dev",
     "test": "turbo run test",
     "lint": "eslint packages apps --ext .ts --max-warnings=0",
