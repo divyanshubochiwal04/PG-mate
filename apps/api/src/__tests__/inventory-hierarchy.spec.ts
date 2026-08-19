@@ -138,9 +138,9 @@ describe('apps/api — M5 Hierarchy Integrity & Uniqueness', () => {
         makeRoom({ status: 'INACTIVE' })
       );
 
-      await expect(
-        frbService.createBed('room-1', ORG, { bedNumber: 'B1' })
-      ).rejects.toThrow(BadRequestException);
+      await expect(frbService.createBed('room-1', ORG, { bedNumber: 'B1' })).rejects.toThrow(
+        BadRequestException
+      );
     });
   });
 

@@ -29,6 +29,8 @@ export default function CreateRoomScreen(): React.JSX.Element {
     mutationFn: (data: Parameters<typeof createRoomApi>[1]) => createRoomApi(floorId ?? '', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rooms', floorId] });
+      queryClient.invalidateQueries({ queryKey: ['building-tree'] });
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
       router.back();
     },
     onError: (err: unknown) => {
@@ -56,15 +58,43 @@ export default function CreateRoomScreen(): React.JSX.Element {
       <Header title="Add New Room" subtitle="Create a room on this floor" />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <Card>
-          <TextInput label="Room Number *" value={roomNumber} onChangeText={setRoomNumber} placeholder="e.g. 101" />
-          <TextInput label="Bed Capacity *" value={capacity} onChangeText={setCapacity} placeholder="e.g. 2" keyboardType="numeric" />
-          <TextInput label="Display Order" value={displayOrder} onChangeText={setDisplayOrder} keyboardType="numeric" />
+          <TextInput
+            label="Room Number *"
+            value={roomNumber}
+            onChangeText={setRoomNumber}
+            placeholder="e.g. 101"
+          />
+          <TextInput
+            label="Bed Capacity *"
+            value={capacity}
+            onChangeText={setCapacity}
+            placeholder="e.g. 2"
+            keyboardType="numeric"
+          />
+          <TextInput
+            label="Display Order"
+            value={displayOrder}
+            onChangeText={setDisplayOrder}
+            keyboardType="numeric"
+          />
 
-          {errorMsg ? <Button title={errorMsg} onPress={() => undefined} variant="danger" disabled /> : null}
+          {errorMsg ? (
+            <Button title={errorMsg} onPress={() => undefined} variant="danger" disabled />
+          ) : null}
 
           <View style={styles.buttonRow}>
-            <Button title="Cancel" onPress={() => router.back()} variant="outline" style={styles.halfBtn} />
-            <Button title="Save Room" onPress={handleSubmit} isLoading={mutation.isPending} style={styles.halfBtn} />
+            <Button
+              title="Cancel"
+              onPress={() => router.back()}
+              variant="outline"
+              style={styles.halfBtn}
+            />
+            <Button
+              title="Save Room"
+              onPress={handleSubmit}
+              isLoading={mutation.isPending}
+              style={styles.halfBtn}
+            />
           </View>
         </Card>
       </ScrollView>

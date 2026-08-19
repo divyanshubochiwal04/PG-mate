@@ -28,7 +28,7 @@ export default function RoomsListScreen(): React.JSX.Element {
   });
 
   const roomsQuery = useQuery({
-    queryKey: ['rooms', floorId, { page: 1 }],
+    queryKey: ['rooms', floorId],
     queryFn: () => getRoomsApi(floorId ?? '', { page: 1, pageSize: 10 }),
     enabled: !!floorId,
   });
@@ -46,7 +46,10 @@ export default function RoomsListScreen(): React.JSX.Element {
     return (
       <Screen>
         <Header title="Rooms" />
-        <ErrorState message="Floor not found or access denied." onRetry={() => floorQuery.refetch()} />
+        <ErrorState
+          message="Floor not found or access denied."
+          onRetry={() => floorQuery.refetch()}
+        />
       </Screen>
     );
   }

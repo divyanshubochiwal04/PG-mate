@@ -54,7 +54,11 @@ export default function PropertiesListScreen(): React.JSX.Element {
         ) : !data || data.items.length === 0 ? (
           <EmptyState
             title="No Properties Found"
-            description={search ? 'No property matched your search.' : 'Add your first property to get started.'}
+            description={
+              search
+                ? 'No property matched your search.'
+                : 'Add your first property to get started.'
+            }
           />
         ) : (
           <FlatList
@@ -63,8 +67,12 @@ export default function PropertiesListScreen(): React.JSX.Element {
             renderItem={({ item }) => (
               <PropertyCard
                 property={item}
-                onPress={() => router.push(`/(owner)/properties/${item.id}` as `/properties/${string}`)}
-                onEdit={() => router.push(`/(owner)/properties/${item.id}/edit` as `/properties/${string}`)}
+                onPress={() =>
+                  router.push(`/(owner)/properties/${item.id}` as `/properties/${string}`)
+                }
+                onEdit={() =>
+                  router.push(`/(owner)/properties/${item.id}/edit` as `/properties/${string}`)
+                }
               />
             )}
             refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}

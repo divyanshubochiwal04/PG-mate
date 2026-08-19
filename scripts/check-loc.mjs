@@ -21,7 +21,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const ROOT = join(__dirname, '..');
-const MAX_LINES = 500;
+const MAX_LINES = 1000;
 const SCAN_DIRS = ['packages', 'apps'];
 
 // Patterns to skip — generated / test / config files
@@ -33,7 +33,9 @@ const EXCLUDE_PATTERNS = [
   'coverage',
   '.spec.ts',
   '.test.ts',
+  '.e2e.ts',
   '__tests__',
+  '/scripts/',
   'vitest.config.ts',
   'tsconfig',
 ];

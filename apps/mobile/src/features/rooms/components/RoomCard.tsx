@@ -29,7 +29,11 @@ export const RoomCard: React.FC<RoomCardProps> = ({ room, onPress, onUpdateCapac
 
       {onUpdateCapacity && (
         <View style={styles.actions}>
-          <TouchableOpacity onPress={onUpdateCapacity} style={styles.actionButton} activeOpacity={0.7}>
+          <TouchableOpacity
+            onPress={onUpdateCapacity}
+            style={styles.actionButton}
+            activeOpacity={0.7}
+          >
             <Text style={styles.actionText}>Change Capacity</Text>
           </TouchableOpacity>
         </View>

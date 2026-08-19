@@ -43,7 +43,10 @@ export default function PropertyDetailScreen(): React.JSX.Element {
     return (
       <Screen>
         <Header title="Property Details" />
-        <ErrorState message="Property not found or access denied." onRetry={() => propertyQuery.refetch()} />
+        <ErrorState
+          message="Property not found or access denied."
+          onRetry={() => propertyQuery.refetch()}
+        />
       </Screen>
     );
   }
@@ -53,24 +56,34 @@ export default function PropertyDetailScreen(): React.JSX.Element {
 
   return (
     <Screen>
-      <Header title={property.name} subtitle={`Code: ${property.code} | Status: ${property.status}`} />
+      <Header
+        title={property.name}
+        subtitle={`Code: ${property.code} | Status: ${property.status}`}
+      />
       <View style={styles.container}>
         <Card style={styles.summaryCard}>
           <Text style={styles.sectionTitle}>Location</Text>
           <Text style={styles.address}>
-            {property.address.addressLine1}, {property.address.locality}, {property.address.city}, {property.address.state} - {property.address.postalCode}
+            {property.address.addressLine1}, {property.address.locality}, {property.address.city},{' '}
+            {property.address.state} - {property.address.postalCode}
           </Text>
           <View style={styles.actionRow}>
             <Button
               title="Edit Property"
               variant="outline"
-              onPress={() => router.push(`/(owner)/properties/${property.id}/edit` as `/properties/${string}`)}
+              onPress={() =>
+                router.push(`/(owner)/properties/${property.id}/edit` as `/properties/${string}`)
+              }
               style={styles.actionBtn}
             />
             <Button
               title="Manage Facilities"
               variant="outline"
-              onPress={() => router.push(`/(owner)/properties/${property.id}/facilities` as `/properties/${string}`)}
+              onPress={() =>
+                router.push(
+                  `/(owner)/properties/${property.id}/facilities` as `/properties/${string}`
+                )
+              }
               style={styles.actionBtn}
             />
           </View>
@@ -78,17 +91,41 @@ export default function PropertyDetailScreen(): React.JSX.Element {
 
         <View style={styles.buildingsHeader}>
           <Text style={styles.sectionTitle}>Buildings / Blocks</Text>
-          <Button
-            title="+ Add Building"
-            variant="primary"
-            onPress={() => router.push(`/(owner)/properties/${property.id}/buildings/create` as `/properties/${string}`)}
-          />
+          <View style={{ flexDirection: 'row', gap: spacing.xs }}>
+            <Button
+              title="🧙‍♂️ Wizard Setup"
+              variant="outline"
+              onPress={() =>
+                router.push(
+                  `/(owner)/properties/${property.id}/buildings/setup` as `/properties/${string}`
+                )
+              }
+            />
+            <Button
+              title="+ Add Single"
+              variant="primary"
+              onPress={() =>
+                router.push(
+                  `/(owner)/properties/${property.id}/buildings/create` as `/properties/${string}`
+                )
+              }
+            />
+          </View>
         </View>
 
         {buildingsQuery.isError ? (
           <ErrorState message="Failed to load buildings" onRetry={() => buildingsQuery.refetch()} />
         ) : !buildings || buildings.items.length === 0 ? (
-          <EmptyState title="No Buildings Found" description="Add your first building to this property." />
+          <EmptyState
+            title="No Buildings Found"
+            description="Add your first building to this property."
+            actionLabel="+ Add Building"
+            onAction={() =>
+              router.push(
+                `/(owner)/properties/${property.id}/buildings/create` as `/properties/${string}`
+              )
+            }
+          />
         ) : (
           <FlatList
             data={buildings.items}
@@ -97,7 +134,9 @@ export default function PropertyDetailScreen(): React.JSX.Element {
               <BuildingCard
                 building={item}
                 onPress={() =>
-                  router.push(`/(owner)/properties/${property.id}/buildings/${item.id}` as `/properties/${string}`)
+                  router.push(
+                    `/(owner)/properties/${property.id}/buildings/${item.id}` as `/properties/${string}`
+                  )
                 }
               />
             )}

@@ -143,7 +143,9 @@ describe('apps/api — M5 Tenant Isolation & Facility Cross-Tenant Security', ()
     });
 
     it('H5 — Owner B GET building owned by Owner A returns 404 Not Found', async () => {
-      vi.spyOn(KyselyBuildingRepository.prototype, 'findByIdForOrganization').mockResolvedValue(null);
+      vi.spyOn(KyselyBuildingRepository.prototype, 'findByIdForOrganization').mockResolvedValue(
+        null
+      );
 
       await expect(pbService.getBuildingById('bldg-a', OWNER_B_ORG)).rejects.toThrow(
         NotFoundException
@@ -204,9 +206,9 @@ describe('apps/api — M5 Tenant Isolation & Facility Cross-Tenant Security', ()
       );
 
       // Caller is Owner A trying to attach fac-b (which belongs to Owner B)
-      await expect(
-        facService.assignFacilityToRoom('room-a', 'fac-b', OWNER_A_ORG)
-      ).rejects.toThrow(NotFoundException);
+      await expect(facService.assignFacilityToRoom('room-a', 'fac-b', OWNER_A_ORG)).rejects.toThrow(
+        NotFoundException
+      );
     });
   });
 });

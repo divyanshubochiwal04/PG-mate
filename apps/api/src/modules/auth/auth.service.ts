@@ -36,8 +36,8 @@ export class AuthService {
   constructor(private readonly emailService: EmailService) {}
 
   public async register(dto: RegisterDto): Promise<UserDto> {
-    const rawEmail = dto?.email || (dto as unknown as Record<string, unknown>)?.[ 'email' ];
-    const rawPassword = dto?.password || (dto as unknown as Record<string, unknown>)?.[ 'password' ];
+    const rawEmail = dto?.email || (dto as unknown as Record<string, unknown>)?.['email'];
+    const rawPassword = dto?.password || (dto as unknown as Record<string, unknown>)?.['password'];
     const normalizedEmail = PasswordPolicy.normalizeEmail(rawEmail as string);
     PasswordPolicy.validate(rawPassword as string);
 
@@ -90,8 +90,8 @@ export class AuthService {
     ipAddress?: string,
     userAgent?: string
   ): Promise<AuthResponseDto> {
-    const rawEmail = dto?.email || (dto as unknown as Record<string, unknown>)?.[ 'email' ];
-    const rawPassword = dto?.password || (dto as unknown as Record<string, unknown>)?.[ 'password' ];
+    const rawEmail = dto?.email || (dto as unknown as Record<string, unknown>)?.['email'];
+    const rawPassword = dto?.password || (dto as unknown as Record<string, unknown>)?.['password'];
     const normalizedEmail = PasswordPolicy.normalizeEmail(rawEmail as string);
     const userRepo = new KyselyUserRepository(dbService.db);
     const user = await userRepo.findByEmail(normalizedEmail);
@@ -159,7 +159,11 @@ export class AuthService {
   }
 
   public async refresh(dto: RefreshDto): Promise<AuthTokensDto> {
-    const tokenHashInput = hashRefreshToken(dto.refreshToken);
+    const rawToken = dto?.refreshToken;
+    if (!rawToken || typeof rawToken !== 'string' || rawToken.trim().length === 0) {
+      throw new UnauthorizedException('Invalid or missing refresh token');
+    }
+    const tokenHashInput = hashRefreshToken(rawToken.trim());
 
     const uow = new KyselyUnitOfWork(dbService.db);
     return uow.runInTransaction(async (trx) => {

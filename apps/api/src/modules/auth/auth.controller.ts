@@ -1,4 +1,14 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -63,8 +73,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Rotate refresh token and issue new access token' })
   @SwaggerResponse({ status: 200, description: 'Tokens rotated successfully' })
   @SwaggerResponse({ status: 401, description: 'Invalid, expired, or reused refresh token' })
-  async refresh(@Body() dto: RefreshDto): Promise<AuthTokensDto> {
-    return this.authService.refresh(dto);
+  async refresh(@Body() dto: RefreshDto, @Req() req: Request): Promise<AuthTokensDto> {
+    const body = (req.body || {}) as Record<string, unknown>;
+    const token = dto?.refreshToken || (body['refreshToken'] as string) || (body['refresh_token'] as string);
+    if (!token || typeof token !== 'string' || token.trim().length === 0) {
+      throw new UnauthorizedException('Refresh token is required');
+    }
+    return this.authService.refresh({ refreshToken: token.trim() });
   }
 
   @Post('logout')

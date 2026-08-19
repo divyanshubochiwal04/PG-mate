@@ -12,7 +12,9 @@ export async function getFacilitiesApi(params?: {
   page?: number;
   pageSize?: number;
 }): Promise<PaginatedResult<FacilityDto>> {
-  const response = await apiClient.get<{ data: PaginatedResult<FacilityDto> }>('/facilities', { params });
+  const response = await apiClient.get<{ data: PaginatedResult<FacilityDto> }>('/facilities', {
+    params,
+  });
   return response.data.data;
 }
 
@@ -78,5 +80,10 @@ export async function unassignFacilityFromRoomApi(
   const response = await apiClient.delete<{ data: { success: boolean } }>(
     `/rooms/${roomId}/facilities/${facilityId}`
   );
+  return response.data.data;
+}
+
+export async function getRoomFacilitiesApi(roomId: string): Promise<FacilityDto[]> {
+  const response = await apiClient.get<{ data: FacilityDto[] }>(`/rooms/${roomId}/facilities`);
   return response.data.data;
 }

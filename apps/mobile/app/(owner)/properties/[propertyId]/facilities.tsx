@@ -31,7 +31,8 @@ export default function PropertyFacilitiesScreen(): React.JSX.Element {
   });
 
   const unassignMutation = useMutation({
-    mutationFn: (facilityId: string) => unassignFacilityFromPropertyApi(propertyId ?? '', facilityId),
+    mutationFn: (facilityId: string) =>
+      unassignFacilityFromPropertyApi(propertyId ?? '', facilityId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['facilities'] });
       queryClient.invalidateQueries({ queryKey: ['property', propertyId] });
@@ -42,7 +43,10 @@ export default function PropertyFacilitiesScreen(): React.JSX.Element {
     return (
       <Screen>
         <Header title="Property Facilities" />
-        <ErrorState message="Failed to load catalog facilities." onRetry={() => facilitiesQuery.refetch()} />
+        <ErrorState
+          message="Failed to load catalog facilities."
+          onRetry={() => facilitiesQuery.refetch()}
+        />
       </Screen>
     );
   }

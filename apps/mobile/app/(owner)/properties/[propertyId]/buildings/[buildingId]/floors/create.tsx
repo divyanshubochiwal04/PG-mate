@@ -52,15 +52,43 @@ export default function CreateFloorScreen(): React.JSX.Element {
       <Header title="Add New Floor" subtitle="Create a floor level in this building" />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <Card>
-          <TextInput label="Floor Name *" value={name} onChangeText={setName} placeholder="e.g. 1st Floor" />
-          <TextInput label="Floor Number *" value={floorNumber} onChangeText={setFloorNumber} placeholder="0 for Ground, 1 for 1st" keyboardType="numeric" />
-          <TextInput label="Display Order" value={displayOrder} onChangeText={setDisplayOrder} keyboardType="numeric" />
+          <TextInput
+            label="Floor Name *"
+            value={name}
+            onChangeText={setName}
+            placeholder="e.g. 1st Floor"
+          />
+          <TextInput
+            label="Floor Number *"
+            value={floorNumber}
+            onChangeText={setFloorNumber}
+            placeholder="0 for Ground, 1 for 1st"
+            keyboardType="numeric"
+          />
+          <TextInput
+            label="Display Order"
+            value={displayOrder}
+            onChangeText={setDisplayOrder}
+            keyboardType="numeric"
+          />
 
-          {errorMsg ? <Button title={errorMsg} onPress={() => undefined} variant="danger" disabled /> : null}
+          {errorMsg ? (
+            <Button title={errorMsg} onPress={() => undefined} variant="danger" disabled />
+          ) : null}
 
           <View style={styles.buttonRow}>
-            <Button title="Cancel" onPress={() => router.back()} variant="outline" style={styles.halfBtn} />
-            <Button title="Save Floor" onPress={handleSubmit} isLoading={mutation.isPending} style={styles.halfBtn} />
+            <Button
+              title="Cancel"
+              onPress={() => router.back()}
+              variant="outline"
+              style={styles.halfBtn}
+            />
+            <Button
+              title="Save Floor"
+              onPress={handleSubmit}
+              isLoading={mutation.isPending}
+              style={styles.halfBtn}
+            />
           </View>
         </Card>
       </ScrollView>

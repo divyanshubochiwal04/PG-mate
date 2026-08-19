@@ -1,8 +1,10 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import type { PropertyDto } from '@m-square/contracts';
 import { Card } from '@/components/ui/Card';
-import { colors, spacing, typography } from '@/theme';
+import { StatusBadge } from '@/components/ui/StatusBadge';
+import { colors, radius, spacing, typography } from '@/design-system';
 
 interface PropertyCardProps {
   property: PropertyDto;
@@ -19,36 +21,31 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onPress, o
             <Text style={styles.name}>{property.name}</Text>
             <Text style={styles.code}>{property.code}</Text>
           </View>
-          <View
-            style={[
-              styles.badge,
-              property.status === 'ACTIVE' ? styles.activeBadge : styles.inactiveBadge,
-            ]}
-          >
-            <Text
-              style={[
-                styles.badgeText,
-                property.status === 'ACTIVE' ? styles.activeText : styles.inactiveText,
-              ]}
-            >
-              {property.status}
-            </Text>
-          </View>
+          <StatusBadge status={property.status} label={property.status} />
         </View>
 
-        <Text style={styles.address}>
-          {property.address.addressLine1}, {property.address.locality}, {property.address.city},{' '}
-          {property.address.state} - {property.address.postalCode}
-        </Text>
+        <View style={styles.addressRow}>
+          <Ionicons name="location-outline" size={14} color={colors.textSecondary} />
+          <Text style={styles.address} numberOfLines={2}>
+            {property.address.addressLine1}, {property.address.locality}, {property.address.city},{' '}
+            {property.address.state} - {property.address.postalCode}
+          </Text>
+        </View>
       </TouchableOpacity>
 
-      {onEdit && (
-        <View style={styles.actions}>
+      <View style={styles.actions}>
+        <TouchableOpacity onPress={onPress} style={styles.primaryAction} activeOpacity={0.7}>
+          <Ionicons name="business-outline" size={14} color={colors.primary} />
+          <Text style={styles.primaryActionText}>View Buildings</Text>
+        </TouchableOpacity>
+
+        {onEdit && (
           <TouchableOpacity onPress={onEdit} style={styles.editButton} activeOpacity={0.7}>
-            <Text style={styles.editButtonText}>Edit Details</Text>
+            <Ionicons name="pencil-outline" size={14} color={colors.textSecondary} />
+            <Text style={styles.editButtonText}>Edit</Text>
           </TouchableOpacity>
-        </View>
-      )}
+        )}
+      </View>
     </Card>
   );
 };
@@ -56,9 +53,12 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onPress, o
 const styles = StyleSheet.create({
   card: {
     marginVertical: spacing.xs,
+    borderRadius: radius.md,
+    borderColor: colors.border,
+    padding: spacing.md,
   },
   content: {
-    flex: 1,
+    paddingBottom: spacing.xs,
   },
   header: {
     flexDirection: 'row',
@@ -71,55 +71,55 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
   },
   name: {
-    fontSize: typography.fontSize.md,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text,
+    ...typography.h3,
+    color: colors.textPrimary,
   },
   code: {
-    fontSize: typography.fontSize.xs,
-    color: colors.muted,
+    ...typography.caption,
+    fontWeight: '700',
+    color: colors.primary,
     marginTop: 2,
   },
-  badge: {
-    paddingHorizontal: spacing.xs,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  activeBadge: {
-    backgroundColor: '#DCFCE7',
-  },
-  inactiveBadge: {
-    backgroundColor: '#F1F5F9',
-  },
-  badgeText: {
-    fontSize: typography.fontSize.xs,
-    fontWeight: typography.fontWeight.semibold,
-  },
-  activeText: {
-    color: colors.success,
-  },
-  inactiveText: {
-    color: colors.muted,
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 4,
+    marginTop: 4,
   },
   address: {
-    fontSize: typography.fontSize.sm,
-    color: colors.muted,
-    marginTop: spacing.xs,
+    ...typography.small,
+    color: colors.textSecondary,
+    flex: 1,
   },
   actions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    marginTop: spacing.sm,
-    paddingTop: spacing.xs,
-    alignItems: 'flex-end',
+    paddingTop: spacing.sm,
+    marginTop: spacing.xs,
+  },
+  primaryAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+  },
+  primaryActionText: {
+    ...typography.caption,
+    fontWeight: '700',
+    color: colors.primary,
   },
   editButton: {
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
   },
   editButtonText: {
-    fontSize: typography.fontSize.xs,
-    color: colors.secondary,
-    fontWeight: typography.fontWeight.medium,
+    ...typography.caption,
+    fontWeight: '600',
+    color: colors.textSecondary,
   },
 });

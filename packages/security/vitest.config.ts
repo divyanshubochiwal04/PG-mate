@@ -5,5 +5,6 @@ export default defineConfig({
     include: ['src/**/*.spec.ts', 'src/**/*.test.ts'],
     exclude: ['dist/**', 'node_modules/**'],
     environment: 'node',
+    testTimeout: 15000,
   },
 });

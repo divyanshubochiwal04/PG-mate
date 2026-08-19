@@ -12,6 +12,10 @@
     "format": "prettier --check \"{packages,apps}/**/*.ts\"",
     "format:fix": "prettier --write \"{packages,apps}/**/*.ts\"",
     "typecheck": "turbo run typecheck",
+    "db:migrate": "pnpm --filter @m-square/database db:migrate",
+    "db:status": "pnpm --filter @m-square/database db:status",
+    "db:schema:verify": "pnpm --filter @m-square/database db:schema:verify",
+    "db:smoke:test": "pnpx ts-node packages/database/src/scripts/real-mutation-smoke-test.ts",
     "loc": "node scripts/check-loc.mjs",
     "clean": "turbo run clean && rimraf node_modules **/node_modules **/dist **/build"
   },

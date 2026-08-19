@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { clearTokens, getAccessToken, setAccessToken, setRefreshToken } from '../auth/token.manager';
+import {
+  clearTokens,
+  getAccessToken,
+  setAccessToken,
+  setRefreshToken,
+} from '../auth/token.manager';
 
 describe('apps/mobile — Auth State & Token Manager Lifecycle', () => {
   it('A1 — stores and clears tokens correctly on login and logout', async () => {

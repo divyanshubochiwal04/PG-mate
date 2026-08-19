@@ -28,16 +28,14 @@ describe('apps/api - HealthService', () => {
       status: 200,
       body: {
         status: 'ok',
-        checks: {
-          application: 'ok',
-          database: 'ok',
-        },
+        application: 'ok',
+        database: { status: 'connected' },
       },
     });
 
     const result = await healthService.getHealthStatus();
     expect(result.status).toBe(200);
     expect(result.body.status).toBe('ok');
-    expect(result.body.checks.database).toBe('ok');
+    expect(result.body.database.status).toBe('connected');
   });
 });

@@ -108,10 +108,10 @@ export class KyselyBedRepository {
     organizationId: string,
     trx?: Transaction<DatabaseSchema>
   ): Promise<number> {
-    const executor = trx || this.db;
+    const executor = this.getExecutor(trx);
     const res = await executor
       .selectFrom('beds')
-      .select(executor.fn.count<string>('id').as('cnt'))
+      .select(this.db.fn.count<string>('id').as('cnt'))
       .where('room_id', '=', roomId)
       .where('organization_id', '=', organizationId)
       .where('status', 'in', ['AVAILABLE', 'MAINTENANCE'])
@@ -125,7 +125,7 @@ export class KyselyBedRepository {
     data: CreateBedData,
     trx?: Transaction<DatabaseSchema>
   ): Promise<BedRow> {
-    const executor = trx || this.db;
+    const executor = this.getExecutor(trx);
     const row = await executor
       .insertInto('beds')
       .values({
@@ -147,7 +147,7 @@ export class KyselyBedRepository {
     status: string,
     trx?: Transaction<DatabaseSchema>
   ): Promise<BedRow | null> {
-    const executor = trx || this.db;
+    const executor = this.getExecutor(trx);
     const row = await executor
       .updateTable('beds')
       .set({
@@ -168,7 +168,7 @@ export class KyselyBedRepository {
     data: UpdateBedData,
     trx?: Transaction<DatabaseSchema>
   ): Promise<BedRow | null> {
-    const executor = trx || this.db;
+    const executor = this.getExecutor(trx);
     const updatePayload: Record<string, unknown> = {
       updated_at: new Date(),
     };

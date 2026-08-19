@@ -52,7 +52,9 @@ export class CreateResidentDto {
   @ApiProperty({ example: '+919876543210', description: 'Primary phone (E.164 format)' })
   @IsString()
   @IsNotEmpty()
-  @Matches(/^\+[1-9]\d{1,14}$/, { message: 'phone must be valid E.164 format (e.g. +919876543210)' })
+  @Matches(/^\+[1-9]\d{1,14}$/, {
+    message: 'phone must be valid E.164 format (e.g. +919876543210)',
+  })
   phone!: string;
 
   @ApiPropertyOptional({ example: '+919876543211', description: 'Alternate phone' })

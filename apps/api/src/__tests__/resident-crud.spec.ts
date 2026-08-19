@@ -75,7 +75,10 @@ describe('apps/api — M6 Resident CRUD & Search Suite', () => {
   });
 
   it('R1 — creates a new resident with auto-generated resident_code', async () => {
-    vi.spyOn(KyselyOrganizationCounterRepository.prototype, 'getNextValueForUpdate').mockResolvedValue(1);
+    vi.spyOn(
+      KyselyOrganizationCounterRepository.prototype,
+      'getNextValueForUpdate'
+    ).mockResolvedValue(1);
     vi.spyOn(KyselyResidentRepository.prototype, 'createForOrganization').mockResolvedValue(
       makeResident()
     );
@@ -109,9 +112,7 @@ describe('apps/api — M6 Resident CRUD & Search Suite', () => {
   });
 
   it('R3 — throws NotFoundException when resident does not exist or wrong tenant', async () => {
-    vi.spyOn(KyselyResidentRepository.prototype, 'findByIdForOrganization').mockResolvedValue(
-      null
-    );
+    vi.spyOn(KyselyResidentRepository.prototype, 'findByIdForOrganization').mockResolvedValue(null);
 
     await expect(service.getResidentById('wrong-id', ORG)).rejects.toThrow(NotFoundException);
   });
@@ -151,13 +152,11 @@ describe('apps/api — M6 Resident CRUD & Search Suite', () => {
     vi.spyOn(KyselyResidentRepository.prototype, 'findByIdForUpdate').mockResolvedValue(
       makeResident()
     );
-    vi.spyOn(KyselyStayRepository.prototype, 'findActiveByResident').mockResolvedValue(
-      makeStay()
-    );
+    vi.spyOn(KyselyStayRepository.prototype, 'findActiveByResident').mockResolvedValue(makeStay());
 
-    await expect(
-      service.updateResident(RES_ID, ORG, { status: 'INACTIVE' })
-    ).rejects.toThrow(BadRequestException);
+    await expect(service.updateResident(RES_ID, ORG, { status: 'INACTIVE' })).rejects.toThrow(
+      BadRequestException
+    );
   });
 
   it('R7 [P1-2] — permits resident deactivation after checkout (no active stay)', async () => {

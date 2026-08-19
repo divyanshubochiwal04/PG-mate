@@ -1,90 +1,112 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import type { TextStyle, ViewStyle } from 'react-native';
-import { colors, spacing, typography } from '../../theme';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableOpacityProps,
+  ViewStyle,
+} from 'react-native';
+import { colors, radius, spacing, typography } from '../../design-system';
 
-interface ButtonProps {
+export interface ButtonProps extends TouchableOpacityProps {
   title: string;
-  onPress: () => void;
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
+  size?: 'small' | 'medium' | 'large';
+  loading?: boolean;
+  /** @deprecated Use `loading` instead */
   isLoading?: boolean;
-  disabled?: boolean;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  icon?: React.ReactNode;
 }
 
 export const Button: React.FC<ButtonProps> = ({
   title,
-  onPress,
   variant = 'primary',
+  size = 'medium',
+  loading: loadingProp = false,
   isLoading = false,
   disabled = false,
+  icon,
   style,
-  textStyle,
+  ...props
 }) => {
-  const getBackgroundColor = (): string => {
-    if (disabled) return colors.mutedBackground;
-    switch (variant) {
-      case 'primary':
-        return colors.primary;
-      case 'secondary':
-        return colors.secondary;
-      case 'danger':
-        return colors.danger;
-      case 'outline':
-        return 'transparent';
+  const loading = loadingProp || isLoading;
+  const getContainerStyle = (): ViewStyle => {
+    let bg = colors.primary;
+    let border = 'transparent';
+
+    if (variant === 'secondary') {
+      bg = colors.secondaryLight;
+    } else if (variant === 'outline') {
+      bg = 'transparent';
+      border = colors.borderDark;
+    } else if (variant === 'ghost') {
+      bg = 'transparent';
+    } else if (variant === 'danger') {
+      bg = colors.danger;
     }
+
+    let minHeight = 48;
+    let paddingH = spacing.lg;
+
+    if (size === 'small') {
+      minHeight = 36;
+      paddingH = spacing.md;
+    } else if (size === 'large') {
+      minHeight = 54;
+      paddingH = spacing.xl;
+    }
+
+    return {
+      backgroundColor: disabled ? colors.borderDark : bg,
+      borderColor: border,
+      borderWidth: variant === 'outline' ? 1 : 0,
+      minHeight,
+      paddingHorizontal: paddingH,
+    };
   };
 
   const getTextColor = (): string => {
-    if (disabled) return colors.muted;
-    switch (variant) {
-      case 'outline':
-        return colors.primary;
-      default:
-        return colors.primaryForeground;
-    }
+    if (disabled) return colors.textMuted;
+    if (variant === 'secondary') return colors.textPrimary;
+    if (variant === 'outline' || variant === 'ghost') return colors.primary;
+    if (variant === 'danger' || variant === 'primary') return colors.surface;
+    return colors.surface;
   };
 
   return (
     <TouchableOpacity
-      style={[
-        styles.button,
-        { backgroundColor: getBackgroundColor() },
-        variant === 'outline' && styles.outlineBorder,
-        style,
-      ]}
-      onPress={onPress}
-      disabled={disabled || isLoading}
-      activeOpacity={0.8}
-      accessible={true}
-      accessibilityLabel={title}
-      accessibilityRole="button"
+      style={[styles.base, getContainerStyle(), style]}
+      disabled={disabled || loading}
+      activeOpacity={0.7}
+      {...props}
     >
-      {isLoading ? (
+      {loading ? (
         <ActivityIndicator color={getTextColor()} size="small" />
       ) : (
-        <Text style={[styles.text, { color: getTextColor() }, textStyle]}>{title}</Text>
+        <>
+          {icon}
+          <Text style={[styles.text, { color: getTextColor() }, size === 'small' && styles.smallText]}>
+            {title}
+          </Text>
+        </>
       )}
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  button: {
-    minHeight: 48,
-    borderRadius: 8,
-    justifyContent: 'center',
+  base: {
+    borderRadius: radius.md,
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    marginVertical: spacing.xs,
-  },
-  outlineBorder: {
-    borderWidth: 1,
-    borderColor: colors.border,
+    justifyContent: 'center',
+    gap: spacing.xs,
   },
   text: {
-    fontSize: typography.fontSize.md,
-    fontWeight: typography.fontWeight.semibold,
+    ...typography.bodyBold,
+  },
+  smallText: {
+    ...typography.smallBold,
   },
 });

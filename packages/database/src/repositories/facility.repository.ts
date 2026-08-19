@@ -1,4 +1,4 @@
-import type { Kysely } from 'kysely';
+import type { Kysely, Transaction } from 'kysely';
 import type { DatabaseSchema } from '../connection/database';
 import type { PaginatedResult, PaginationParams } from '@m-square/contracts';
 import { calculatePaginationBounds, createPaginatedResult } from '@m-square/contracts';
@@ -33,6 +33,12 @@ export interface UpdateFacilityData {
 
 export class KyselyFacilityRepository {
   constructor(private readonly db: Kysely<DatabaseSchema>) {}
+
+  private getExecutor(trx?: Transaction<DatabaseSchema>) {
+    return trx && typeof (trx as unknown as Record<string, unknown>).selectFrom === 'function'
+      ? trx
+      : this.db;
+  }
 
   public async findByIdForOrganization(
     id: string,
@@ -190,9 +196,11 @@ export class KyselyFacilityRepository {
   public async assignToRoom(
     roomId: string,
     facilityId: string,
-    organizationId: string
+    organizationId: string,
+    trx?: Transaction<DatabaseSchema>
   ): Promise<boolean> {
-    const res = await this.db
+    const executor = this.getExecutor(trx);
+    const res = await executor
       .insertInto('room_facilities')
       .values({
         room_id: roomId,
@@ -218,5 +226,60 @@ export class KyselyFacilityRepository {
       .executeTakeFirst();
 
     return Number(result.numDeletedRows) > 0;
+  }
+
+  public async findAssignedToRoom(roomId: string, organizationId: string): Promise<FacilityRow[]> {
+    const rows = await this.db
+      .selectFrom('facilities as f')
+      .innerJoin('room_facilities as rf', (join) =>
+        join.onRef('rf.facility_id', '=', 'f.id').on('rf.organization_id', '=', organizationId)
+      )
+      .selectAll('f')
+      .where('rf.room_id', '=', roomId)
+      .where('f.organization_id', '=', organizationId)
+      .orderBy('f.name', 'asc')
+      .execute();
+
+    return rows as FacilityRow[];
+  }
+
+  public async isFacilityAssigned(facilityId: string, organizationId: string): Promise<boolean> {
+    const propRes = await this.db
+      .selectFrom('property_facilities')
+      .select(this.db.fn.count<string>('facility_id').as('cnt'))
+      .where('facility_id', '=', facilityId)
+      .where('organization_id', '=', organizationId)
+      .executeTakeFirstOrThrow();
+
+    const bldgRes = await this.db
+      .selectFrom('building_facilities')
+      .select(this.db.fn.count<string>('facility_id').as('cnt'))
+      .where('facility_id', '=', facilityId)
+      .where('organization_id', '=', organizationId)
+      .executeTakeFirstOrThrow();
+
+    const roomRes = await this.db
+      .selectFrom('room_facilities')
+      .select(this.db.fn.count<string>('facility_id').as('cnt'))
+      .where('facility_id', '=', facilityId)
+      .where('organization_id', '=', organizationId)
+      .executeTakeFirstOrThrow();
+
+    return (
+      parseInt(propRes.cnt, 10) > 0 ||
+      parseInt(bldgRes.cnt, 10) > 0 ||
+      parseInt(roomRes.cnt, 10) > 0
+    );
+  }
+
+  public async countFacilitiesForRoom(roomId: string, organizationId: string): Promise<number> {
+    const res = await this.db
+      .selectFrom('room_facilities')
+      .select(this.db.fn.count<string>('facility_id').as('cnt'))
+      .where('room_id', '=', roomId)
+      .where('organization_id', '=', organizationId)
+      .executeTakeFirstOrThrow();
+
+    return parseInt(res.cnt, 10);
   }
 }

@@ -26,15 +26,22 @@ import { InventoryService } from './inventory.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { CreateBuildingDto } from './dto/create-building.dto';
+import { UpdateBuildingDto } from './dto/update-building.dto';
 import { CreateFloorDto } from './dto/create-floor.dto';
+import { UpdateFloorDto } from './dto/update-floor.dto';
 import { CreateRoomDto } from './dto/create-room.dto';
+import { UpdateRoomDto } from './dto/update-room.dto';
 import { UpdateCapacityDto } from './dto/update-capacity.dto';
 import { CreateBedDto } from './dto/create-bed.dto';
+import { UpdateBedDto } from './dto/update-bed.dto';
 import { UpdateBedStatusDto } from './dto/update-bed-status.dto';
 import { CreateFacilityDto } from './dto/create-facility.dto';
+import { CreateBuildingSetupDto } from './dto/create-building-setup.dto';
 import type {
   BedDto,
   BuildingDto,
+  BuildingOccupancyTreeDto,
+  BuildingSetupResultDto,
   FacilityDto,
   FloorDto,
   PaginatedResult,
@@ -48,6 +55,24 @@ import type {
 @ApiBearerAuth('bearer-auth')
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
+
+  @Get('configuration/summary')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get unified operational configuration summary for tenant' })
+  async getOperationalConfigurationSummary() {
+    return this.inventoryService.getOperationalConfigurationSummary(this.getOrgId());
+  }
+
+  // --- BUILDING SETUP WIZARD (BULK) ---
+  @Post('buildings/setup')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Bulk create building setup wizard (Building → Floors → Rooms → Beds → Facilities)',
+  })
+  @SwaggerResponse({ status: 201, description: 'Building hierarchy created atomically' })
+  async setupBuilding(@Body() dto: CreateBuildingSetupDto): Promise<BuildingSetupResultDto> {
+    return this.inventoryService.setupBuilding(this.getOrgId(), dto);
+  }
 
   // --- PROPERTIES ---
   @Post('properties')
@@ -130,6 +155,33 @@ export class InventoryController {
     return this.inventoryService.getBuildingById(id, this.getOrgId());
   }
 
+  @Get('buildings/:id/tree')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get authoritative building occupancy tree (Floors → Rooms → Beds → Active Residents)',
+  })
+  async getBuildingOccupancyTree(@Param('id') id: string): Promise<BuildingOccupancyTreeDto> {
+    return this.inventoryService.getBuildingOccupancyTree(id, this.getOrgId());
+  }
+
+  @Put('buildings/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update building name, code, display order, or status' })
+  async updateBuilding(
+    @Param('id') id: string,
+    @Body() dto: UpdateBuildingDto
+  ): Promise<BuildingDto> {
+    return this.inventoryService.updateBuilding(id, this.getOrgId(), dto);
+  }
+
+  @Delete('buildings/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete building (blocked if floors exist)' })
+  async deleteBuilding(@Param('id') id: string): Promise<{ success: boolean }> {
+    await this.inventoryService.deleteBuilding(id, this.getOrgId());
+    return { success: true };
+  }
+
   // --- FLOORS ---
   @Post('buildings/:buildingId/floors')
   @HttpCode(HttpStatus.CREATED)
@@ -158,6 +210,21 @@ export class InventoryController {
   @ApiOperation({ summary: 'Get floor details by ID' })
   async getFloorById(@Param('id') id: string): Promise<FloorDto> {
     return this.inventoryService.getFloorById(id, this.getOrgId());
+  }
+
+  @Put('floors/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update floor name, number, display order, or status' })
+  async updateFloor(@Param('id') id: string, @Body() dto: UpdateFloorDto): Promise<FloorDto> {
+    return this.inventoryService.updateFloor(id, this.getOrgId(), dto);
+  }
+
+  @Delete('floors/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete floor (blocked if rooms exist)' })
+  async deleteFloor(@Param('id') id: string): Promise<{ success: boolean }> {
+    await this.inventoryService.deleteFloor(id, this.getOrgId());
+    return { success: true };
   }
 
   // --- ROOMS ---
@@ -200,6 +267,21 @@ export class InventoryController {
     return this.inventoryService.updateRoomCapacity(id, this.getOrgId(), dto);
   }
 
+  @Put('rooms/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update room number, type, display order, or status' })
+  async updateRoom(@Param('id') id: string, @Body() dto: UpdateRoomDto): Promise<RoomDto> {
+    return this.inventoryService.updateRoom(id, this.getOrgId(), dto);
+  }
+
+  @Delete('rooms/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete room (blocked if beds exist)' })
+  async deleteRoom(@Param('id') id: string): Promise<{ success: boolean }> {
+    await this.inventoryService.deleteRoom(id, this.getOrgId());
+    return { success: true };
+  }
+
   // --- BEDS ---
   @Post('rooms/:roomId/beds')
   @HttpCode(HttpStatus.CREATED)
@@ -225,6 +307,28 @@ export class InventoryController {
   @ApiOperation({ summary: 'Update bed status (AVAILABLE, INACTIVE, MAINTENANCE)' })
   async updateBedStatus(@Param('id') id: string, @Body() dto: UpdateBedStatusDto): Promise<BedDto> {
     return this.inventoryService.updateBedStatus(id, this.getOrgId(), dto);
+  }
+
+  @Get('beds/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Get bed details by ID' })
+  async getBedById(@Param('id') id: string): Promise<BedDto> {
+    return this.inventoryService.getBedById(id, this.getOrgId());
+  }
+
+  @Put('beds/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update bed label, display order, or status' })
+  async updateBed(@Param('id') id: string, @Body() dto: UpdateBedDto): Promise<BedDto> {
+    return this.inventoryService.updateBed(id, this.getOrgId(), dto);
+  }
+
+  @Delete('beds/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete bed (blocked if active resident allocation exists)' })
+  async deleteBed(@Param('id') id: string): Promise<{ success: boolean }> {
+    await this.inventoryService.deleteBed(id, this.getOrgId());
+    return { success: true };
   }
 
   // --- FACILITIES ---
@@ -310,6 +414,13 @@ export class InventoryController {
   ): Promise<{ success: boolean }> {
     await this.inventoryService.unassignFacilityFromRoom(id, facilityId, this.getOrgId());
     return { success: true };
+  }
+
+  @Get('rooms/:id/facilities')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'List facilities assigned to a room' })
+  async getFacilitiesForRoom(@Param('id') id: string): Promise<FacilityDto[]> {
+    return this.inventoryService.getFacilitiesForRoom(id, this.getOrgId());
   }
 
   private getOrgId(): string {

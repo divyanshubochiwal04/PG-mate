@@ -52,15 +52,43 @@ export default function CreateBuildingScreen(): React.JSX.Element {
       <Header title="Add New Building" subtitle="Create a block or tower in this property" />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <Card>
-          <TextInput label="Building Name *" value={name} onChangeText={setName} placeholder="e.g. Tower A" />
-          <TextInput label="Building Code *" value={code} onChangeText={setCode} placeholder="e.g. TWR-A" autoCapitalize="characters" />
-          <TextInput label="Display Order" value={displayOrder} onChangeText={setDisplayOrder} keyboardType="numeric" />
+          <TextInput
+            label="Building Name *"
+            value={name}
+            onChangeText={setName}
+            placeholder="e.g. Tower A"
+          />
+          <TextInput
+            label="Building Code *"
+            value={code}
+            onChangeText={setCode}
+            placeholder="e.g. TWR-A"
+            autoCapitalize="characters"
+          />
+          <TextInput
+            label="Display Order"
+            value={displayOrder}
+            onChangeText={setDisplayOrder}
+            keyboardType="numeric"
+          />
 
-          {errorMsg ? <Button title={errorMsg} onPress={() => undefined} variant="danger" disabled /> : null}
+          {errorMsg ? (
+            <Button title={errorMsg} onPress={() => undefined} variant="danger" disabled />
+          ) : null}
 
           <View style={styles.buttonRow}>
-            <Button title="Cancel" onPress={() => router.back()} variant="outline" style={styles.halfBtn} />
-            <Button title="Save Building" onPress={handleSubmit} isLoading={mutation.isPending} style={styles.halfBtn} />
+            <Button
+              title="Cancel"
+              onPress={() => router.back()}
+              variant="outline"
+              style={styles.halfBtn}
+            />
+            <Button
+              title="Save Building"
+              onPress={handleSubmit}
+              isLoading={mutation.isPending}
+              style={styles.halfBtn}
+            />
           </View>
         </Card>
       </ScrollView>

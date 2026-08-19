@@ -1,4 +1,4 @@
-import type { Kysely } from 'kysely';
+import type { Kysely, Transaction } from 'kysely';
 import type { DatabaseSchema } from '../connection/database';
 import type { PaginatedResult, PaginationParams } from '@m-square/contracts';
 import { calculatePaginationBounds, createPaginatedResult } from '@m-square/contracts';
@@ -32,6 +32,12 @@ export interface UpdateBuildingData {
 
 export class KyselyBuildingRepository {
   constructor(private readonly db: Kysely<DatabaseSchema>) {}
+
+  private getExecutor(trx?: Transaction<DatabaseSchema>) {
+    return trx && typeof (trx as unknown as Record<string, unknown>).selectFrom === 'function'
+      ? trx
+      : this.db;
+  }
 
   public async findByIdForOrganization(
     id: string,
@@ -79,9 +85,11 @@ export class KyselyBuildingRepository {
 
   public async createForOrganization(
     organizationId: string,
-    data: CreateBuildingData
+    data: CreateBuildingData,
+    trx?: Transaction<DatabaseSchema>
   ): Promise<BuildingRow> {
-    const row = await this.db
+    const executor = this.getExecutor(trx);
+    const row = await executor
       .insertInto('buildings')
       .values({
         property_id: data.propertyId,

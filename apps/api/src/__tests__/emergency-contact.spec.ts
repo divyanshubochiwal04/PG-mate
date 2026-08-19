@@ -76,12 +76,11 @@ describe('apps/api — M6 Emergency Contact & Primary Invariant Suite', () => {
     vi.spyOn(KyselyResidentRepository.prototype, 'findByIdForOrganization').mockResolvedValue(
       makeResident()
     );
-    vi.spyOn(KyselyEmergencyContactRepository.prototype, 'findAllByResident').mockResolvedValue(
-      []
-    );
-    vi.spyOn(KyselyEmergencyContactRepository.prototype, 'unsetPrimaryForResident').mockResolvedValue(
-      undefined
-    );
+    vi.spyOn(KyselyEmergencyContactRepository.prototype, 'findAllByResident').mockResolvedValue([]);
+    vi.spyOn(
+      KyselyEmergencyContactRepository.prototype,
+      'unsetPrimaryForResident'
+    ).mockResolvedValue(undefined);
     vi.spyOn(KyselyEmergencyContactRepository.prototype, 'createForResident').mockResolvedValue(
       makeContact({ is_primary: true })
     );
@@ -121,22 +120,24 @@ describe('apps/api — M6 Emergency Contact & Primary Invariant Suite', () => {
   });
 
   it('EC3 — rejects unsetting primary on sole contact (P1-1 rule)', async () => {
-    vi.spyOn(KyselyEmergencyContactRepository.prototype, 'findByIdForOrganization').mockResolvedValue(
-      makeContact({ is_primary: true })
-    );
+    vi.spyOn(
+      KyselyEmergencyContactRepository.prototype,
+      'findByIdForOrganization'
+    ).mockResolvedValue(makeContact({ is_primary: true }));
     vi.spyOn(KyselyEmergencyContactRepository.prototype, 'findAllByResident').mockResolvedValue([
       makeContact({ is_primary: true }),
     ]);
 
-    await expect(
-      service.updateContact(CONTACT_1, ORG, { isPrimary: false })
-    ).rejects.toThrow(BadRequestException);
+    await expect(service.updateContact(CONTACT_1, ORG, { isPrimary: false })).rejects.toThrow(
+      BadRequestException
+    );
   });
 
   it('EC4 — deleting primary contact auto-promotes next contact to primary (P1-1 rule)', async () => {
-    vi.spyOn(KyselyEmergencyContactRepository.prototype, 'findByIdForOrganization').mockResolvedValue(
-      makeContact({ id: CONTACT_1, is_primary: true })
-    );
+    vi.spyOn(
+      KyselyEmergencyContactRepository.prototype,
+      'findByIdForOrganization'
+    ).mockResolvedValue(makeContact({ id: CONTACT_1, is_primary: true }));
     vi.spyOn(KyselyEmergencyContactRepository.prototype, 'deleteForResident').mockResolvedValue(
       true
     );
@@ -149,18 +150,14 @@ describe('apps/api — M6 Emergency Contact & Primary Invariant Suite', () => {
 
     await service.deleteContact(CONTACT_1, ORG);
 
-    expect(updateSpy).toHaveBeenCalledWith(
-      CONTACT_2,
-      ORG,
-      { isPrimary: true },
-      expect.anything()
-    );
+    expect(updateSpy).toHaveBeenCalledWith(CONTACT_2, ORG, { isPrimary: true }, expect.anything());
   });
 
   it('EC5 — throws NotFoundException when deleting non-existent contact', async () => {
-    vi.spyOn(KyselyEmergencyContactRepository.prototype, 'findByIdForOrganization').mockResolvedValue(
-      null
-    );
+    vi.spyOn(
+      KyselyEmergencyContactRepository.prototype,
+      'findByIdForOrganization'
+    ).mockResolvedValue(null);
 
     await expect(service.deleteContact('invalid-id', ORG)).rejects.toThrow(NotFoundException);
   });

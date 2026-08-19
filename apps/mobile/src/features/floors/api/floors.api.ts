@@ -7,6 +7,13 @@ export interface CreateFloorInput {
   displayOrder?: number;
 }
 
+export interface UpdateFloorInput {
+  name?: string;
+  floorNumber?: number;
+  displayOrder?: number;
+  status?: 'ACTIVE' | 'INACTIVE';
+}
+
 export async function getFloorsApi(
   buildingId: string,
   params?: { page?: number; pageSize?: number }
@@ -27,6 +34,19 @@ export async function createFloorApi(
   buildingId: string,
   data: CreateFloorInput
 ): Promise<FloorDto> {
-  const response = await apiClient.post<{ data: FloorDto }>(`/buildings/${buildingId}/floors`, data);
+  const response = await apiClient.post<{ data: FloorDto }>(
+    `/buildings/${buildingId}/floors`,
+    data
+  );
+  return response.data.data;
+}
+
+export async function updateFloorApi(id: string, data: UpdateFloorInput): Promise<FloorDto> {
+  const response = await apiClient.put<{ data: FloorDto }>(`/floors/${id}`, data);
+  return response.data.data;
+}
+
+export async function deleteFloorApi(id: string): Promise<{ success: boolean }> {
+  const response = await apiClient.delete<{ data: { success: boolean } }>(`/floors/${id}`);
   return response.data.data;
 }

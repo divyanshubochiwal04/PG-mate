@@ -1,7 +1,13 @@
 import React, { createContext, useEffect, useState } from 'react';
-import { clearTokens, getAccessToken, getRefreshToken, setAccessToken, setRefreshToken } from './token.manager';
+import {
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  setAccessToken,
+  setRefreshToken,
+} from './token.manager';
 import { clearQueryCache } from '../config/query-client';
-import { loginApi } from '../api/auth.api';
+import { loginApi, registerApi } from '../api/auth.api';
 import { setUnauthenticatedHandler } from '../api/client';
 import type { LoginResponseData } from '../api/auth.api';
 
@@ -19,6 +25,7 @@ export interface AuthContextType {
   isLoading: boolean;
   user: AuthUser | null;
   login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -29,7 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-    useEffect(() => {
+  useEffect(() => {
     setUnauthenticatedHandler(() => {
       clearQueryCache();
       setIsAuthenticated(false);
@@ -47,7 +54,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setIsAuthenticated(false);
           setUser(null);
         }
-      } catch {
+      } catch (err: unknown) {
+        console.warn('[AuthContext] Failed to hydrate auth state:', err);
         setIsAuthenticated(false);
         setUser(null);
       } finally {
@@ -60,8 +68,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string): Promise<void> => {
     const data: LoginResponseData = await loginApi(email, password);
-    const accessToken = data.tokens?.accessToken || (data as unknown as Record<string, string>).accessToken;
-    const refreshToken = data.tokens?.refreshToken || (data as unknown as Record<string, string>).refreshToken;
+    const accessToken =
+      data.tokens?.accessToken || (data as unknown as Record<string, string>).accessToken;
+    const refreshToken =
+      data.tokens?.refreshToken || (data as unknown as Record<string, string>).refreshToken;
 
     if (!accessToken || !refreshToken) {
       throw new Error('Authentication failed: Invalid token payload received from server');
@@ -80,13 +90,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAuthenticated(true);
   };
 
+  const register = async (email: string, password: string): Promise<void> => {
+    await registerApi(email, password);
+    // After registration, automatically login
+    await login(email, password);
+  };
+
   const logout = async (): Promise<void> => {
     try {
       await clearTokens();
       clearQueryCache();
       setIsAuthenticated(false);
       setUser(null);
-    } catch {
+    } catch (err: unknown) {
+      console.warn('[AuthContext] Error during logout token clearing:', err);
       clearQueryCache();
       setIsAuthenticated(false);
       setUser(null);
@@ -94,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

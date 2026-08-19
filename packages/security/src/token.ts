@@ -51,5 +51,8 @@ export function generateRefreshToken(): string {
  * To verify: hash the incoming token, compare against the stored hash.
  */
 export function hashRefreshToken(token: string): string {
+  if (!token || typeof token !== 'string') {
+    throw new Error('Invalid refresh token: token must be a non-empty string');
+  }
   return crypto.createHash('sha256').update(token, 'utf8').digest('hex');
 }

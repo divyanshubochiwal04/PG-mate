@@ -3,7 +3,10 @@ import { createBuildingApi, getBuildingsApi } from '../features/buildings/api/bu
 import { createFloorApi, getFloorsApi } from '../features/floors/api/floors.api';
 import { createRoomApi, getRoomsApi, updateRoomCapacityApi } from '../features/rooms/api/rooms.api';
 import { createBedApi, getBedsApi, updateBedStatusApi } from '../features/beds/api/beds.api';
-import { assignFacilityToPropertyApi, getFacilitiesApi } from '../features/facilities/api/facilities.api';
+import {
+  assignFacilityToPropertyApi,
+  getFacilitiesApi,
+} from '../features/facilities/api/facilities.api';
 
 describe('apps/mobile — Physical Inventory Hierarchy API Features', () => {
   it('I1 — should expose Building API functions', () => {

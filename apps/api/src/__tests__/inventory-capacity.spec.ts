@@ -4,11 +4,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 process.env['DATABASE_URL'] = 'postgresql://postgres:postgres@localhost:5432/m_square_test';
 process.env['JWT_SECRET'] = 'test-secret-for-unit-tests-at-least-32-chars!!';
 
-import {
-  KyselyBedRepository,
-  KyselyRoomRepository,
-  KyselyUnitOfWork,
-} from '@m-square/database';
+import { KyselyBedRepository, KyselyRoomRepository, KyselyUnitOfWork } from '@m-square/database';
 import type { BedRow, RoomRow } from '@m-square/database';
 import { FloorRoomBedService } from '../modules/inventory/services/floor-room-bed.service';
 
@@ -70,9 +66,7 @@ describe('apps/api — M5 Capacity Enforcement', () => {
         makeRoom({ capacity: 1 })
       );
       vi.spyOn(KyselyBedRepository.prototype, 'countActiveBedsInRoom').mockResolvedValue(0);
-      vi.spyOn(KyselyBedRepository.prototype, 'createForOrganization').mockResolvedValue(
-        makeBed()
-      );
+      vi.spyOn(KyselyBedRepository.prototype, 'createForOrganization').mockResolvedValue(makeBed());
 
       const result = await service.createBed(ROOM_ID, ORG, { bedNumber: 'B1' });
       expect(result.bedNumber).toBe('B1');
@@ -148,9 +142,9 @@ describe('apps/api — M5 Capacity Enforcement', () => {
       );
       vi.spyOn(KyselyBedRepository.prototype, 'countActiveBedsInRoom').mockResolvedValue(1);
 
-      await expect(
-        service.updateBedStatus(BED_B, ORG, { status: 'MAINTENANCE' })
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.updateBedStatus(BED_B, ORG, { status: 'MAINTENANCE' })).rejects.toThrow(
+        BadRequestException
+      );
     });
   });
 
@@ -194,9 +188,9 @@ describe('apps/api — M5 Capacity Enforcement', () => {
       );
       vi.spyOn(KyselyBedRepository.prototype, 'countActiveBedsInRoom').mockResolvedValue(1);
 
-      await expect(
-        service.updateBedStatus(BED_B, ORG, { status: 'AVAILABLE' })
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.updateBedStatus(BED_B, ORG, { status: 'AVAILABLE' })).rejects.toThrow(
+        BadRequestException
+      );
     });
 
     it('D2 — blocks INACTIVE -> MAINTENANCE when room is at full capacity (cap=1, active=1)', async () => {
@@ -210,9 +204,9 @@ describe('apps/api — M5 Capacity Enforcement', () => {
       );
       vi.spyOn(KyselyBedRepository.prototype, 'countActiveBedsInRoom').mockResolvedValue(1);
 
-      await expect(
-        service.updateBedStatus(BED_B, ORG, { status: 'MAINTENANCE' })
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.updateBedStatus(BED_B, ORG, { status: 'MAINTENANCE' })).rejects.toThrow(
+        BadRequestException
+      );
     });
 
     it('D3 — allows INACTIVE -> AVAILABLE after deactivating an active bed (active=0)', async () => {
@@ -255,9 +249,9 @@ describe('apps/api — M5 Capacity Enforcement', () => {
       );
       vi.spyOn(KyselyBedRepository.prototype, 'countActiveBedsInRoom').mockResolvedValue(2);
 
-      await expect(
-        service.updateRoomCapacity(ROOM_ID, ORG, { capacity: 1 })
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.updateRoomCapacity(ROOM_ID, ORG, { capacity: 1 })).rejects.toThrow(
+        BadRequestException
+      );
     });
   });
 });

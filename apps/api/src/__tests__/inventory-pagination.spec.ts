@@ -37,9 +37,7 @@ describe('apps/api — M5 Filtered Pagination COUNT (P1-A Regression Suite)', ()
       async (orgId, params, search) => {
         let filtered = allProps.filter((p) => p.organization_id === orgId);
         if (search) {
-          filtered = filtered.filter((p) =>
-            p.name.toLowerCase().includes(search.toLowerCase())
-          );
+          filtered = filtered.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
         }
         const total = filtered.length;
         const page = params.page || 1;

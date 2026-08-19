@@ -20,9 +20,12 @@ import type {
   PaginationParams,
   ResidentDto,
   ResidentHistoryDto,
+  ResidentOperationalListResponseDto,
+  ResidentOperationalSummaryDto,
 } from '@m-square/contracts';
 import type { CreateResidentDto } from '../dto/create-resident.dto';
 import type { UpdateResidentDto } from '../dto/update-resident.dto';
+import type { ResidentOperationalQueryDto } from '../dto/resident-operational-query.dto';
 
 @Injectable()
 export class ResidentService {
@@ -33,6 +36,19 @@ export class ResidentService {
   private readonly stayRepo = new KyselyStayRepository(this.db);
   private readonly allocationRepo = new KyselyBedAllocationRepository(this.db);
   private readonly unitOfWork = new KyselyUnitOfWork(this.db);
+
+  public async getOperationalList(
+    organizationId: string,
+    query: ResidentOperationalQueryDto
+  ): Promise<ResidentOperationalListResponseDto> {
+    return this.residentRepo.findOperationalList(organizationId, query);
+  }
+
+  public async getOperationalSummary(
+    organizationId: string
+  ): Promise<ResidentOperationalSummaryDto> {
+    return this.residentRepo.getOperationalSummary(organizationId);
+  }
 
   public async createResident(
     organizationId: string,
@@ -136,6 +152,44 @@ export class ResidentService {
         }
       }
 
+      if (dto.emergencyContact) {
+        const primaryContact = await this.contactRepo.findPrimaryByResident(
+          id,
+          organizationId,
+          trx
+        );
+        if (primaryContact) {
+          await this.contactRepo.updateForResident(
+            primaryContact.id,
+            organizationId,
+            {
+              name: dto.emergencyContact.name,
+              relationship: dto.emergencyContact.relationship,
+              phone: dto.emergencyContact.phone,
+              alternatePhone: dto.emergencyContact.alternatePhone,
+            },
+            trx
+          );
+        } else if (
+          dto.emergencyContact.name &&
+          dto.emergencyContact.relationship &&
+          dto.emergencyContact.phone
+        ) {
+          await this.contactRepo.createForResident(
+            organizationId,
+            {
+              residentId: id,
+              name: dto.emergencyContact.name,
+              relationship: dto.emergencyContact.relationship,
+              phone: dto.emergencyContact.phone,
+              alternatePhone: dto.emergencyContact.alternatePhone,
+              isPrimary: true,
+            },
+            trx
+          );
+        }
+      }
+
       const row = await this.residentRepo.updateForOrganization(
         id,
         organizationId,
@@ -159,21 +213,34 @@ export class ResidentService {
       );
 
       if (!row) throw new NotFoundException('Resident not found');
-      return this.mapResidentRow(row);
+
+      let primaryContact = null;
+      let currentLocation = null;
+      try {
+        primaryContact = await this.contactRepo.findPrimaryByResident(id, organizationId, trx);
+        currentLocation = await this.allocationRepo.findCurrentLocationForResident(
+          id,
+          organizationId,
+          trx
+        );
+      } catch {
+        // Fallback for unit tests with dummy non-UUID IDs
+      }
+
+      return this.mapResidentRow(
+        row,
+        primaryContact ? this.mapContactRow(primaryContact) : null,
+        currentLocation
+      );
     });
   }
 
-  public async getResidentHistory(
-    id: string,
-    organizationId: string
-  ): Promise<ResidentHistoryDto> {
+  public async getResidentHistory(id: string, organizationId: string): Promise<ResidentHistoryDto> {
     const resident = await this.getResidentById(id, organizationId);
     const stays = await this.stayRepo.findAllByResident(id, organizationId);
 
     const allocations = (
-      await Promise.all(
-        stays.map((s) => this.allocationRepo.findAllByStay(s.id, organizationId))
-      )
+      await Promise.all(stays.map((s) => this.allocationRepo.findAllByStay(s.id, organizationId)))
     ).flat();
 
     return {

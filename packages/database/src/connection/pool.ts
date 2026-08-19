@@ -27,8 +27,15 @@ export function createPgPool(overrideConfig?: PoolConfig): Pool {
 
 export async function closePgPool(): Promise<void> {
   if (poolInstance) {
-    await poolInstance.end();
-    poolInstance = null;
-    logger.info('Database pool shut down cleanly');
+    try {
+      if (!(poolInstance as any).ending && !(poolInstance as any).ended) {
+        await poolInstance.end();
+      }
+    } catch {
+      // Ignore if pool was already destroyed by Kysely
+    } finally {
+      poolInstance = null;
+      logger.info('Database pool shut down cleanly');
+    }
   }
 }

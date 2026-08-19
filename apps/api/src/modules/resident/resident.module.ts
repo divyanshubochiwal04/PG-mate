@@ -6,8 +6,10 @@ import { ResidentService } from './services/resident.service';
 import { EmergencyContactService } from './services/emergency-contact.service';
 import { StayAllocationService } from './services/stay-allocation.service';
 
+import { MessModule } from '../mess/mess.module';
+
 @Module({
-  imports: [TenantModule],
+  imports: [TenantModule, MessModule],
   controllers: [ResidentController, AllocationController],
   providers: [ResidentService, EmergencyContactService, StayAllocationService],
   exports: [ResidentService, EmergencyContactService, StayAllocationService],

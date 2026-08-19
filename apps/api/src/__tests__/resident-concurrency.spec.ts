@@ -70,6 +70,7 @@ describe('apps/api — M6 Concurrency Matrix & Double Allocation Suite', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       async (fn) => fn({} as any)
     );
+    vi.spyOn(KyselyBedRepository.prototype, 'updateStatus').mockResolvedValue(makeBed(BED_1));
   });
 
   afterEach(() => {
@@ -300,8 +301,8 @@ describe('apps/api — M6 Concurrency Matrix & Double Allocation Suite', () => {
     let residentStatus = 'ACTIVE';
     let activeStay: StayRow | null = null;
 
-    vi.spyOn(KyselyResidentRepository.prototype, 'findByIdForUpdate').mockImplementation(
-      async () => makeResident(RES_1)
+    vi.spyOn(KyselyResidentRepository.prototype, 'findByIdForUpdate').mockImplementation(async () =>
+      makeResident(RES_1)
     );
 
     vi.spyOn(KyselyStayRepository.prototype, 'findActiveByResident').mockImplementation(

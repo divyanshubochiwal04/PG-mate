@@ -9,7 +9,10 @@ import {
   KyselyBedAllocationRepository,
   KyselyBedRepository,
   KyselyBuildingRepository,
+  KyselyCommercialRepository,
   KyselyFloorRepository,
+  KyselyMessRepository,
+  KyselyNotificationRepository,
   KyselyPropertyRepository,
   KyselyResidentRepository,
   KyselyRoomRepository,
@@ -21,6 +24,7 @@ import type { BedAllocationDto, StayDto } from '@m-square/contracts';
 import type { CheckInDto } from '../dto/check-in.dto';
 import type { TransferDto } from '../dto/transfer.dto';
 import type { CheckOutDto } from '../dto/check-out.dto';
+import type { CheckInCommercialDto } from '../../commercial/dto/check-in-commercial.dto';
 
 @Injectable()
 export class StayAllocationService {
@@ -33,6 +37,9 @@ export class StayAllocationService {
   private readonly floorRepo = new KyselyFloorRepository(this.db);
   private readonly buildingRepo = new KyselyBuildingRepository(this.db);
   private readonly propertyRepo = new KyselyPropertyRepository(this.db);
+  private readonly commercialRepo = new KyselyCommercialRepository(this.db);
+  private readonly messRepo = new KyselyMessRepository(this.db);
+  private readonly notificationRepo = new KyselyNotificationRepository(this.db);
   private readonly unitOfWork = new KyselyUnitOfWork(this.db);
 
   // --- CHECK-IN WORKFLOW ---
@@ -125,6 +132,29 @@ export class StayAllocationService {
           trx
         );
 
+        // Mark bed as OCCUPIED atomically
+        await this.bedRepo.updateStatus(dto.bedId, organizationId, 'OCCUPIED', trx);
+
+        await this.notificationRepo.createIfNotExists(
+          organizationId,
+          {
+            type: 'RESIDENT_CHECKED_IN',
+            severity: 'INFO',
+            title: 'Resident Checked In',
+            message: `${resident.first_name} ${resident.last_name} checked in successfully.`,
+            entity_type: 'RESIDENT',
+            entity_id: resident.id,
+            action_route: `/(owner)/residents/${resident.id}`,
+            metadata: { stayId: stayRow.id, bedId: dto.bedId, residentCode: resident.resident_code },
+            dedupe_key: `RESIDENT_CHECKED_IN:${stayRow.id}`,
+            status: 'UNREAD',
+            read_at: null,
+            resolved_at: null,
+            expires_at: null,
+          },
+          trx
+        );
+
         return {
           stay: this.mapStayRow(stayRow),
           allocation: this.mapAllocationRow(allocRow),
@@ -157,12 +187,12 @@ export class StayAllocationService {
         throw new BadRequestException('Cannot transfer an inactive or ended allocation');
       }
 
+      if (currentAlloc.bed_id === dto.targetBedId) {
+        throw new BadRequestException('Target bed must be different from current bed');
+      }
+
       // 🔒 Lock stay row FOR UPDATE to enforce deterministic lock ordering
-      const stay = await this.stayRepo.findByIdForUpdate(
-        currentAlloc.stay_id,
-        organizationId,
-        trx
-      );
+      const stay = await this.stayRepo.findByIdForUpdate(currentAlloc.stay_id, organizationId, trx);
       if (!stay || stay.status !== 'ACTIVE') {
         throw new BadRequestException('Stay associated with allocation is no longer active');
       }
@@ -175,6 +205,12 @@ export class StayAllocationService {
 
       const targetBed = beds.find((b) => b?.id === dto.targetBedId);
       if (!targetBed) throw new NotFoundException('Target bed not found');
+      if (targetBed.status === 'MAINTENANCE') {
+        throw new BadRequestException('Target bed is under maintenance');
+      }
+      if (targetBed.status === 'OCCUPIED') {
+        throw new ConflictException('Target bed is already occupied by an active allocation');
+      }
       if (targetBed.status !== 'AVAILABLE') {
         throw new BadRequestException(
           `Target bed is not available for transfer (Status: ${targetBed.status})`
@@ -193,6 +229,7 @@ export class StayAllocationService {
 
       // Atomically close old allocation & create new allocation
       await this.allocationRepo.endAllocation(allocationId, organizationId, new Date(), trx);
+      await this.bedRepo.updateStatus(currentAlloc.bed_id, organizationId, 'AVAILABLE', trx);
 
       const newAlloc = await this.allocationRepo.createForOrganization(
         organizationId,
@@ -200,6 +237,27 @@ export class StayAllocationService {
           stayId: currentAlloc.stay_id,
           bedId: dto.targetBedId,
           startAt: new Date(),
+        },
+        trx
+      );
+      await this.bedRepo.updateStatus(dto.targetBedId, organizationId, 'OCCUPIED', trx);
+
+      await this.notificationRepo.createIfNotExists(
+        organizationId,
+        {
+          type: 'RESIDENT_TRANSFERRED',
+          severity: 'INFO',
+          title: 'Resident Transferred',
+          message: `Resident transferred to new bed allocation.`,
+          entity_type: 'RESIDENT',
+          entity_id: stay.resident_id,
+          action_route: `/(owner)/residents/${stay.resident_id}`,
+          metadata: { allocationId: newAlloc.id, stayId: stay.id, oldBedId: currentAlloc.bed_id, newBedId: dto.targetBedId },
+          dedupe_key: `RESIDENT_TRANSFERRED:${newAlloc.id}`,
+          status: 'UNREAD',
+          read_at: null,
+          resolved_at: null,
+          expires_at: null,
         },
         trx
       );
@@ -221,13 +279,25 @@ export class StayAllocationService {
         throw new BadRequestException('Stay is not active and cannot be checked out');
       }
 
-      // Find and end active allocation for this stay
-      const activeAlloc = await this.allocationRepo.findActiveByStay(stayId, organizationId, trx);
-      if (activeAlloc) {
-        await this.allocationRepo.endAllocation(activeAlloc.id, organizationId, new Date(), trx);
+      const resident = await this.residentRepo.findByIdForOrganization(stay.resident_id, organizationId, trx);
+      if (!resident) {
+        throw new NotFoundException('Resident not found');
       }
 
       const checkoutDate = dto.actualCheckoutDate ? new Date(dto.actualCheckoutDate) : new Date();
+      const dateStr = checkoutDate.toISOString().split('T')[0];
+
+      // Find and end active allocation for this stay
+      const activeAlloc = await this.allocationRepo.findActiveByStay(stayId, organizationId, trx);
+      if (activeAlloc) {
+        await this.bedRepo.findByIdForUpdate(activeAlloc.bed_id, organizationId, trx);
+        await this.allocationRepo.endAllocation(activeAlloc.id, organizationId, checkoutDate, trx);
+        await this.bedRepo.updateStatus(activeAlloc.bed_id, organizationId, 'AVAILABLE', trx);
+      }
+
+      await this.commercialRepo.supersedeActiveAgreement(organizationId, stayId, dateStr, trx);
+      await this.messRepo.endActiveSubscription(organizationId, stayId, dateStr, trx);
+
       const completedStay = await this.stayRepo.completeStay(
         stayId,
         organizationId,
@@ -237,11 +307,164 @@ export class StayAllocationService {
       );
 
       if (!completedStay) throw new NotFoundException('Stay not found');
+
+      await this.notificationRepo.createIfNotExists(
+        organizationId,
+        {
+          type: 'RESIDENT_CHECKED_OUT',
+          severity: 'INFO',
+          title: 'Resident Checked Out',
+          message: `${resident.first_name} ${resident.last_name} completed checkout.`,
+          entity_type: 'RESIDENT',
+          entity_id: resident.id,
+          action_route: `/(owner)/residents/${resident.id}`,
+          metadata: { stayId: completedStay.id, checkoutDate: dateStr },
+          dedupe_key: `RESIDENT_CHECKED_OUT:${completedStay.id}`,
+          status: 'UNREAD',
+          read_at: null,
+          resolved_at: null,
+          expires_at: null,
+        },
+        trx
+      );
+
       return this.mapStayRow(completedStay);
     });
   }
 
-  // --- READ METHODS ---
+  public async checkOutResident(
+    organizationId: string,
+    residentId: string,
+    dto: CheckOutDto
+  ): Promise<StayDto> {
+    const resident = await this.residentRepo.findByIdForOrganization(residentId, organizationId);
+    if (!resident) {
+      throw new NotFoundException('Resident not found');
+    }
+    const stay = await this.stayRepo.findActiveByResident(residentId, organizationId);
+    if (!stay) {
+      throw new BadRequestException('Resident has no active stay to check out');
+    }
+    return this.checkOut(organizationId, stay.id, dto);
+  }
+
+  // --- ATOMIC CHECK-IN WITH COMMERCIAL TERMS ---
+  public async checkInCommercial(
+    organizationId: string,
+    dto: CheckInCommercialDto
+  ): Promise<{ stay: StayDto; allocation: BedAllocationDto }> {
+    return await this.unitOfWork.runInTransaction(async (trx) => {
+      const { stay, allocation } = await this.checkIn(organizationId, {
+        residentId: dto.residentId,
+        bedId: dto.bedId,
+        admissionDate: dto.admissionDate,
+        notes: dto.notes,
+      });
+
+      const admissionDate = dto.admissionDate || new Date().toISOString().split('T')[0];
+
+      await this.commercialRepo.createAgreement(
+        {
+          organization_id: organizationId,
+          resident_id: dto.residentId,
+          stay_id: stay.id,
+          base_rent_amount: dto.baseRentAmount,
+          security_deposit_amount: dto.securityDepositAmount ?? 0,
+          security_deposit_status: 'PENDING',
+          billing_cycle: dto.billingCycle || 'JOINING_DATE',
+          effective_date: admissionDate,
+          end_date: null,
+          status: 'ACTIVE',
+        },
+        trx
+      );
+
+      if (dto.facilityIds && dto.facilityIds.length > 0) {
+        for (const facilityId of dto.facilityIds) {
+          await this.commercialRepo.assignFacility(
+            {
+              organization_id: organizationId,
+              resident_id: dto.residentId,
+              stay_id: stay.id,
+              facility_id: facilityId,
+              facility_type: 'INCLUDED',
+              monthly_charge: 0,
+              status: 'ACTIVE',
+              effective_date: admissionDate,
+            },
+            trx
+          );
+        }
+      }
+
+      if (dto.additionalCharges && dto.additionalCharges.length > 0) {
+        for (const charge of dto.additionalCharges) {
+          await this.commercialRepo.addAdditionalCharge(
+            {
+              organization_id: organizationId,
+              resident_id: dto.residentId,
+              stay_id: stay.id,
+              agreement_id: null,
+              charge_type: charge.chargeType,
+              description: charge.description,
+              amount: charge.amount,
+              is_recurring: charge.isRecurring ?? true,
+              effective_date: charge.effectiveDate || admissionDate,
+              status: 'ACTIVE',
+            },
+            trx
+          );
+        }
+      }
+
+      if (dto.messSubscription?.messId && dto.messSubscription?.mealPlanId) {
+        const plan = await this.messRepo.findMealPlanById(
+          dto.messSubscription.mealPlanId,
+          organizationId,
+          trx
+        );
+        await this.messRepo.createSubscription(
+          {
+            organization_id: organizationId,
+            resident_id: dto.residentId,
+            stay_id: stay.id,
+            mess_id: dto.messSubscription.messId,
+            meal_plan_id: dto.messSubscription.mealPlanId,
+            billing_mode: plan?.billing_mode || 'MONTHLY',
+            price_at_subscription: plan ? Number(plan.price) : 0,
+            status: 'ACTIVE',
+            start_date: admissionDate,
+            end_date: null,
+          },
+          trx
+        );
+      }
+
+      return { stay, allocation };
+    });
+  }
+
+  // --- READ & UPDATE METHODS ---
+  public async getActiveStays(organizationId: string): Promise<StayDto[]> {
+    const rows = await this.stayRepo.findActiveStaysByOrganization(organizationId);
+    return rows.map((r) => this.mapStayRow(r));
+  }
+
+  public async updateStay(
+    id: string,
+    organizationId: string,
+    dto: { expectedCheckoutDate?: string; notes?: string }
+  ): Promise<StayDto> {
+    const row = await this.stayRepo.updateForOrganization(id, organizationId, {
+      expectedCheckoutDate: dto.expectedCheckoutDate
+        ? new Date(dto.expectedCheckoutDate)
+        : undefined,
+      notes: dto.notes,
+    });
+    if (!row) throw new NotFoundException('Stay not found');
+    return this.mapStayRow(row);
+  }
+
   public async getStayById(id: string, organizationId: string): Promise<StayDto> {
     const row = await this.stayRepo.findByIdForOrganization(id, organizationId);
     if (!row) throw new NotFoundException('Stay not found');

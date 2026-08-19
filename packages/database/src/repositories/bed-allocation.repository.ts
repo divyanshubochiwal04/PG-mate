@@ -130,9 +130,11 @@ export class KyselyBedAllocationRepository {
 
   public async findCurrentLocationForResident(
     residentId: string,
-    organizationId: string
+    organizationId: string,
+    trx?: Transaction<DatabaseSchema>
   ): Promise<DetailedCurrentLocation | null> {
-    const row = await this.db
+    const executor = this.getExecutor(trx);
+    const row = await executor
       .selectFrom('stays as s')
       .innerJoin('bed_allocations as ba', (join) =>
         join.onRef('ba.stay_id', '=', 's.id').on('ba.status', '=', 'ACTIVE')

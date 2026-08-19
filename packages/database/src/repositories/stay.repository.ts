@@ -146,4 +146,45 @@ export class KyselyStayRepository {
 
     return (row as StayRow) || null;
   }
+
+  public async updateForOrganization(
+    id: string,
+    organizationId: string,
+    data: { expectedCheckoutDate?: Date | null; notes?: string | null },
+    trx?: Transaction<DatabaseSchema>
+  ): Promise<StayRow | null> {
+    const executor = this.getExecutor(trx);
+    const updatePayload: Record<string, unknown> = {
+      updated_at: new Date(),
+    };
+
+    if (data.expectedCheckoutDate !== undefined)
+      updatePayload['expected_checkout_date'] = data.expectedCheckoutDate;
+    if (data.notes !== undefined) updatePayload['notes'] = data.notes;
+
+    const row = await executor
+      .updateTable('stays')
+      .set(updatePayload)
+      .where('id', '=', id)
+      .where('organization_id', '=', organizationId)
+      .returningAll()
+      .executeTakeFirst();
+
+    return (row as StayRow) || null;
+  }
+
+  public async findActiveStaysByOrganization(
+    organizationId: string,
+    trx?: Transaction<DatabaseSchema>
+  ): Promise<StayRow[]> {
+    const executor = this.getExecutor(trx);
+    const rows = await executor
+      .selectFrom('stays')
+      .selectAll()
+      .where('organization_id', '=', organizationId)
+      .where('status', '=', 'ACTIVE')
+      .execute();
+
+    return rows as StayRow[];
+  }
 }

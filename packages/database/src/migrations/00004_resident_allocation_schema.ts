@@ -146,14 +146,8 @@ export async function up(db: Kysely<unknown>): Promise<void> {
       ['id', 'organization_id'],
       (cb) => cb.onDelete('restrict')
     )
-    .addCheckConstraint(
-      'check_allocations_status',
-      sql`status IN ('ACTIVE', 'ENDED', 'CANCELLED')`
-    )
-    .addCheckConstraint(
-      'check_allocations_dates',
-      sql`end_at IS NULL OR end_at >= start_at`
-    )
+    .addCheckConstraint('check_allocations_status', sql`status IN ('ACTIVE', 'ENDED', 'CANCELLED')`)
+    .addCheckConstraint('check_allocations_dates', sql`end_at IS NULL OR end_at >= start_at`)
     .addCheckConstraint(
       'check_allocations_status_end_nullability',
       sql`(status = 'ACTIVE' AND end_at IS NULL) OR (status IN ('ENDED', 'CANCELLED') AND end_at IS NOT NULL)`

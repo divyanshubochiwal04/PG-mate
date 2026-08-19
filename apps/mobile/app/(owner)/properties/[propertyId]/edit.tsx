@@ -18,7 +18,13 @@ export default function EditPropertyScreen(): React.JSX.Element {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { data: property, isLoading, isError, error, refetch } = useQuery({
+  const {
+    data: property,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['property', propertyId],
     queryFn: () => getPropertyByIdApi(propertyId ?? ''),
     enabled: !!propertyId,
@@ -62,7 +68,14 @@ export default function EditPropertyScreen(): React.JSX.Element {
 
   const handleSubmit = () => {
     setErrorMsg(null);
-    if (!name.trim() || !addressLine1.trim() || !locality.trim() || !city.trim() || !state.trim() || !postalCode.trim()) {
+    if (
+      !name.trim() ||
+      !addressLine1.trim() ||
+      !locality.trim() ||
+      !city.trim() ||
+      !state.trim() ||
+      !postalCode.trim()
+    ) {
       setErrorMsg('Please fill in all required fields.');
       return;
     }
@@ -92,7 +105,10 @@ export default function EditPropertyScreen(): React.JSX.Element {
     return (
       <Screen>
         <Header title="Edit Property" />
-        <ErrorState message={error instanceof Error ? error.message : 'Property not found'} onRetry={refetch} />
+        <ErrorState
+          message={error instanceof Error ? error.message : 'Property not found'}
+          onRetry={refetch}
+        />
       </Screen>
     );
   }
@@ -108,13 +124,30 @@ export default function EditPropertyScreen(): React.JSX.Element {
           <TextInput label="Locality *" value={locality} onChangeText={setLocality} />
           <TextInput label="City *" value={city} onChangeText={setCity} />
           <TextInput label="State *" value={state} onChangeText={setState} />
-          <TextInput label="Postal Code *" value={postalCode} onChangeText={setPostalCode} keyboardType="numeric" />
+          <TextInput
+            label="Postal Code *"
+            value={postalCode}
+            onChangeText={setPostalCode}
+            keyboardType="numeric"
+          />
 
-          {errorMsg ? <Button title={errorMsg} onPress={() => undefined} variant="danger" disabled /> : null}
+          {errorMsg ? (
+            <Button title={errorMsg} onPress={() => undefined} variant="danger" disabled />
+          ) : null}
 
           <View style={styles.buttonRow}>
-            <Button title="Cancel" onPress={() => router.back()} variant="outline" style={styles.halfBtn} />
-            <Button title="Save Changes" onPress={handleSubmit} isLoading={mutation.isPending} style={styles.halfBtn} />
+            <Button
+              title="Cancel"
+              onPress={() => router.back()}
+              variant="outline"
+              style={styles.halfBtn}
+            />
+            <Button
+              title="Save Changes"
+              onPress={handleSubmit}
+              isLoading={mutation.isPending}
+              style={styles.halfBtn}
+            />
           </View>
         </Card>
       </ScrollView>

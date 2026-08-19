@@ -1,6 +1,12 @@
 import axios from 'axios';
 import { getApiBaseUrl } from '../config/env';
-import { clearTokens, getAccessToken, getRefreshToken, setAccessToken, setRefreshToken } from '../auth/token.manager';
+import {
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  setAccessToken,
+  setRefreshToken,
+} from '../auth/token.manager';
 
 export const apiClient = axios.create({
   baseURL: getApiBaseUrl(),
@@ -30,8 +36,9 @@ function processQueue(error: Error | null, token: string | null = null): void {
   failedQueue = [];
 }
 
-// Request Interceptor — inject Bearer token & X-Request-ID
+// Request Interceptor — inject Bearer token & ensure fresh baseURL
 apiClient.interceptors.request.use(async (config) => {
+  config.baseURL = getApiBaseUrl();
   const token = await getAccessToken();
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -47,7 +54,10 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       // Do not attempt token refresh if 401 came from auth login or refresh endpoints
-      if (originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/refresh')) {
+      if (
+        originalRequest.url?.includes('/auth/login') ||
+        originalRequest.url?.includes('/auth/refresh')
+      ) {
         return Promise.reject(error);
       }
 
@@ -73,8 +83,10 @@ apiClient.interceptors.response.use(
           refreshToken,
         });
 
-        const newAccessToken = refreshResponse.data?.data?.accessToken || refreshResponse.data?.accessToken;
-        const newRefreshToken = refreshResponse.data?.data?.refreshToken || refreshResponse.data?.refreshToken;
+        const newAccessToken =
+          refreshResponse.data?.data?.accessToken || refreshResponse.data?.accessToken;
+        const newRefreshToken =
+          refreshResponse.data?.data?.refreshToken || refreshResponse.data?.refreshToken;
 
         if (!newAccessToken || !newRefreshToken) {
           throw new Error('Invalid refresh response payload');

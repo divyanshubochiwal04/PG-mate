@@ -1,6 +1,16 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsIn, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
+import {
+  IsEmail,
+  IsIn,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 import type { Gender, ResidentStatus } from '@m-square/contracts';
+import { UpdateEmergencyContactDto } from './update-emergency-contact.dto';
 
 export class UpdateResidentDto {
   @ApiPropertyOptional({ example: 'John' })
@@ -84,4 +94,10 @@ export class UpdateResidentDto {
   @IsOptional()
   @IsIn(['ACTIVE', 'INACTIVE'])
   status?: ResidentStatus;
+
+  @ApiPropertyOptional({ type: UpdateEmergencyContactDto })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => UpdateEmergencyContactDto)
+  emergencyContact?: UpdateEmergencyContactDto;
 }

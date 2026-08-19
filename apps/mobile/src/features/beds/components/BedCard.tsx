@@ -7,13 +7,17 @@ import { colors, spacing, typography } from '@/theme';
 interface BedCardProps {
   bed: BedDto;
   onToggleStatus?: (newStatus: 'AVAILABLE' | 'INACTIVE' | 'MAINTENANCE') => void;
+  onDelete?: () => void;
 }
 
-export const BedCard: React.FC<BedCardProps> = ({ bed, onToggleStatus }) => {
+export const BedCard: React.FC<BedCardProps> = ({ bed, onToggleStatus, onDelete }) => {
   const getStatusBadgeStyle = () => {
+    if (bed.activeResident || bed.status === 'OCCUPIED') {
+      return { bg: '#DCFCE7', text: colors.success };
+    }
     switch (bed.status) {
       case 'AVAILABLE':
-        return { bg: '#DCFCE7', text: colors.success };
+        return { bg: '#E0F2FE', text: colors.primary };
       case 'MAINTENANCE':
         return { bg: '#FEF3C7', text: '#D97706' };
       default:
@@ -28,16 +32,24 @@ export const BedCard: React.FC<BedCardProps> = ({ bed, onToggleStatus }) => {
       <View style={styles.header}>
         <View style={styles.titleContainer}>
           <Text style={styles.name}>{bed.bedNumber}</Text>
-          <Text style={styles.order}>Display Order: #{bed.displayOrder}</Text>
+          {bed.activeResident ? (
+            <Text style={styles.residentTag}>
+              👤 Occupied by: <Text style={{ fontWeight: 'bold' }}>{bed.activeResident.fullName}</Text>
+            </Text>
+          ) : (
+            <Text style={styles.order}>Display Order: #{bed.displayOrder}</Text>
+          )}
         </View>
         <View style={[styles.badge, { backgroundColor: statusStyle.bg }]}>
-          <Text style={[styles.badgeText, { color: statusStyle.text }]}>{bed.status}</Text>
+          <Text style={[styles.badgeText, { color: statusStyle.text }]}>
+            {bed.activeResident ? 'OCCUPIED' : bed.status}
+          </Text>
         </View>
       </View>
 
-      {onToggleStatus && (
+      {(onToggleStatus || onDelete) && (
         <View style={styles.actions}>
-          {bed.status !== 'AVAILABLE' && (
+          {onToggleStatus && bed.status !== 'AVAILABLE' && (
             <TouchableOpacity
               onPress={() => onToggleStatus('AVAILABLE')}
               style={styles.actionButton}
@@ -46,7 +58,7 @@ export const BedCard: React.FC<BedCardProps> = ({ bed, onToggleStatus }) => {
               <Text style={[styles.actionText, { color: colors.success }]}>Set Available</Text>
             </TouchableOpacity>
           )}
-          {bed.status !== 'MAINTENANCE' && (
+          {onToggleStatus && bed.status !== 'MAINTENANCE' && (
             <TouchableOpacity
               onPress={() => onToggleStatus('MAINTENANCE')}
               style={styles.actionButton}
@@ -55,13 +67,18 @@ export const BedCard: React.FC<BedCardProps> = ({ bed, onToggleStatus }) => {
               <Text style={[styles.actionText, { color: '#D97706' }]}>Set Maintenance</Text>
             </TouchableOpacity>
           )}
-          {bed.status !== 'INACTIVE' && (
+          {onToggleStatus && bed.status !== 'INACTIVE' && (
             <TouchableOpacity
               onPress={() => onToggleStatus('INACTIVE')}
               style={styles.actionButton}
               activeOpacity={0.7}
             >
               <Text style={[styles.actionText, { color: colors.muted }]}>Deactivate</Text>
+            </TouchableOpacity>
+          )}
+          {onDelete && (
+            <TouchableOpacity onPress={onDelete} style={styles.actionButton} activeOpacity={0.7}>
+              <Text style={[styles.actionText, { color: colors.danger }]}>Delete</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -90,6 +107,11 @@ const styles = StyleSheet.create({
   order: {
     fontSize: typography.fontSize.xs,
     color: colors.muted,
+    marginTop: 2,
+  },
+  residentTag: {
+    fontSize: typography.fontSize.xs,
+    color: colors.success,
     marginTop: 2,
   },
   badge: {

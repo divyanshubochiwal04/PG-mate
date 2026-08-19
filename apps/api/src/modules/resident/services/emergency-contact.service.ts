@@ -100,11 +100,7 @@ export class EmergencyContactService {
           );
         }
       } else if (dto.isPrimary === true && !contact.is_primary) {
-        await this.contactRepo.unsetPrimaryForResident(
-          contact.resident_id,
-          organizationId,
-          trx
-        );
+        await this.contactRepo.unsetPrimaryForResident(contact.resident_id, organizationId, trx);
       }
 
       const updated = await this.contactRepo.updateForResident(
@@ -138,11 +134,7 @@ export class EmergencyContactService {
 
       // If deleted contact was primary, auto-promote next remaining contact if any
       if (wasPrimary) {
-        const remaining = await this.contactRepo.findAllByResident(
-          residentId,
-          organizationId,
-          trx
-        );
+        const remaining = await this.contactRepo.findAllByResident(residentId, organizationId, trx);
         if (remaining.length > 0) {
           await this.contactRepo.updateForResident(
             remaining[0].id,

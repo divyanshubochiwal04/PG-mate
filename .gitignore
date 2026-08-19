@@ -41,6 +41,7 @@ pnpm-debug.log*
 .idea/
 .vscode/*
 !.vscode/settings.json
+.gemini/
 *.suo
 *.ntvs*
 *.njsproj

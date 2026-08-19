@@ -1,109 +1,81 @@
-import React, { useState } from 'react';
-import { TextInput as RNTextInput, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import type { KeyboardTypeOptions, ReturnKeyTypeOptions, ViewStyle } from 'react-native';
-import { colors, spacing, typography } from '../../theme';
+import React from 'react';
+import {
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextInput as RNTextInput,
+  TextInputProps as RNTextInputProps,
+  View,
+  ViewStyle,
+} from 'react-native';
+import { colors, radius, spacing, typography } from '../../design-system';
 
-interface TextInputProps {
+export interface TextInputProps extends RNTextInputProps {
   label?: string;
-  value: string;
-  onChangeText: (text: string) => void;
-  placeholder?: string;
   error?: string;
-  secureTextEntry?: boolean;
-  keyboardType?: KeyboardTypeOptions;
-  autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
-  returnKeyType?: ReturnKeyTypeOptions;
-  onSubmitEditing?: () => void;
-  style?: ViewStyle;
+  helperText?: string;
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 export const TextInput: React.FC<TextInputProps> = ({
   label,
-  value,
-  onChangeText,
-  placeholder,
   error,
-  secureTextEntry = false,
-  keyboardType = 'default',
-  autoCapitalize = 'none',
-  returnKeyType = 'done',
-  onSubmitEditing,
+  helperText,
+  containerStyle,
   style,
+  ...props
 }) => {
-  const [isSecureVisible, setIsSecureVisible] = useState(!secureTextEntry);
-
   return (
-    <View style={[styles.container, style]}>
-      {label && <Text style={styles.label}>{label}</Text>}
-      <View style={[styles.inputWrapper, error ? styles.inputError : null]}>
-        <RNTextInput
-          style={styles.input}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={colors.muted}
-          secureTextEntry={secureTextEntry && !isSecureVisible}
-          keyboardType={keyboardType}
-          autoCapitalize={autoCapitalize}
-          returnKeyType={returnKeyType}
-          onSubmitEditing={onSubmitEditing}
-          accessible={true}
-          accessibilityLabel={label || placeholder}
-        />
-        {secureTextEntry && (
-          <TouchableOpacity
-            style={styles.toggleButton}
-            onPress={() => setIsSecureVisible((prev) => !prev)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.toggleText}>{isSecureVisible ? 'Hide' : 'Show'}</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-      {error && <Text style={styles.errorText}>{error}</Text>}
+    <View style={[styles.container, containerStyle]}>
+      {Boolean(label) && <Text style={styles.label}>{label}</Text>}
+      <RNTextInput
+        style={[
+          styles.input,
+          Boolean(error) && styles.inputError,
+          style,
+        ]}
+        placeholderTextColor={colors.textMuted}
+        {...props}
+      />
+      {Boolean(error) ? (
+        <Text style={styles.errorText}>{error}</Text>
+      ) : Boolean(helperText) ? (
+        <Text style={styles.helperText}>{helperText}</Text>
+      ) : null}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: spacing.xs,
+    marginBottom: spacing.md,
   },
   label: {
-    fontSize: typography.fontSize.sm,
-    fontWeight: typography.fontWeight.medium,
-    color: colors.text,
+    ...typography.smallBold,
+    color: colors.textPrimary,
     marginBottom: spacing.xs,
   },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    minHeight: 48,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
+  input: {
+    height: 48,
     backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.borderDark,
+    borderRadius: radius.sm,
     paddingHorizontal: spacing.md,
+    fontSize: 15,
+    color: colors.textPrimary,
   },
   inputError: {
     borderColor: colors.danger,
   },
-  input: {
-    flex: 1,
-    fontSize: typography.fontSize.md,
-    color: colors.text,
-  },
-  toggleButton: {
-    padding: spacing.xs,
-  },
-  toggleText: {
-    fontSize: typography.fontSize.sm,
-    color: colors.secondary,
-    fontWeight: typography.fontWeight.medium,
-  },
   errorText: {
-    fontSize: typography.fontSize.xs,
+    ...typography.caption,
     color: colors.danger,
-    marginTop: spacing.xs,
+    marginTop: 4,
+  },
+  helperText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginTop: 4,
   },
 });

@@ -8,13 +8,16 @@ import {
   KyselyBedAllocationRepository,
   KyselyBedRepository,
   KyselyBuildingRepository,
+  KyselyCommercialRepository,
   KyselyFloorRepository,
+  KyselyMessRepository,
   KyselyPropertyRepository,
   KyselyResidentRepository,
   KyselyRoomRepository,
   KyselyStayRepository,
   KyselyUnitOfWork,
 } from '@m-square/database';
+
 import type {
   BedAllocationRow,
   BedRow,
@@ -177,6 +180,10 @@ describe('apps/api — M6 Stay & Bed Allocation Workflows', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       async (fn) => fn({} as any)
     );
+    vi.spyOn(KyselyCommercialRepository.prototype, 'supersedeActiveAgreement').mockResolvedValue(
+      undefined
+    );
+    vi.spyOn(KyselyBedRepository.prototype, 'updateStatus').mockResolvedValue(makeBed());
   });
 
   afterEach(() => {
@@ -260,9 +267,7 @@ describe('apps/api — M6 Stay & Bed Allocation Workflows', () => {
       vi.spyOn(KyselyBedAllocationRepository.prototype, 'findByIdForUpdate').mockResolvedValue(
         makeAllocation()
       );
-      vi.spyOn(KyselyStayRepository.prototype, 'findByIdForUpdate').mockResolvedValue(
-        makeStay()
-      );
+      vi.spyOn(KyselyStayRepository.prototype, 'findByIdForUpdate').mockResolvedValue(makeStay());
       vi.spyOn(KyselyBedRepository.prototype, 'findByIdForUpdate').mockImplementation(
         async (id) => {
           if (id === BED_1) return makeBed({ id: BED_1 });
@@ -314,15 +319,21 @@ describe('apps/api — M6 Stay & Bed Allocation Workflows', () => {
 
   describe('Checkout Workflow', () => {
     it('SA6 — successful Checkout (completes stay & ends active allocation)', async () => {
-      vi.spyOn(KyselyStayRepository.prototype, 'findByIdForUpdate').mockResolvedValue(
-        makeStay()
-      );
+      vi.spyOn(KyselyStayRepository.prototype, 'findByIdForUpdate').mockResolvedValue(makeStay());
+      vi.spyOn(KyselyResidentRepository.prototype, 'findByIdForOrganization').mockResolvedValue(makeResident());
       vi.spyOn(KyselyBedAllocationRepository.prototype, 'findActiveByStay').mockResolvedValue(
         makeAllocation()
       );
+      vi.spyOn(KyselyBedRepository.prototype, 'findByIdForUpdate').mockResolvedValue(makeBed());
       const endAllocSpy = vi
         .spyOn(KyselyBedAllocationRepository.prototype, 'endAllocation')
         .mockResolvedValue(makeAllocation({ status: 'ENDED' }));
+      vi.spyOn(KyselyCommercialRepository.prototype, 'supersedeActiveAgreement').mockResolvedValue(
+        undefined as never
+      );
+      vi.spyOn(KyselyMessRepository.prototype, 'endActiveSubscription').mockResolvedValue(
+        undefined as never
+      );
       vi.spyOn(KyselyStayRepository.prototype, 'completeStay').mockResolvedValue(
         makeStay({ status: 'COMPLETED', actual_checkout_date: new Date() })
       );

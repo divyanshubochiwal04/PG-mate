@@ -50,6 +50,17 @@ export class FacilityService {
     };
   }
 
+  public async getFacilitiesForRoom(
+    roomId: string,
+    organizationId: string
+  ): Promise<FacilityDto[]> {
+    const room = await this.roomRepo.findByIdForOrganization(roomId, organizationId);
+    if (!room) throw new NotFoundException('Room not found');
+
+    const rows = await this.facilityRepo.findAssignedToRoom(roomId, organizationId);
+    return rows.map((r: FacilityRow) => this.mapFacilityRow(r));
+  }
+
   public async assignFacilityToProperty(
     propertyId: string,
     facilityId: string,

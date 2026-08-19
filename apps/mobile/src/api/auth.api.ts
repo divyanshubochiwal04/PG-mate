@@ -18,8 +18,18 @@ export interface LoginResponseData {
 }
 
 export async function loginApi(email: string, password: string): Promise<LoginResponseData> {
-  const response = await apiClient.post<{ data: LoginResponseData }>('/auth/login', { email, password });
+  const response = await apiClient.post<{ data: LoginResponseData }>('/auth/login', {
+    email,
+    password,
+  });
   return response.data.data;
+}
+
+export async function registerApi(email: string, password: string): Promise<void> {
+  await apiClient.post('/auth/register', {
+    email,
+    password,
+  });
 }
 
 export async function refreshTokensApi(refreshToken: string): Promise<AuthTokens> {

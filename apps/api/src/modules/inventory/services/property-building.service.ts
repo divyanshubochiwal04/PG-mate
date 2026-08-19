@@ -15,6 +15,7 @@ import type {
 import type { CreatePropertyDto } from '../dto/create-property.dto';
 import type { UpdatePropertyDto } from '../dto/update-property.dto';
 import type { CreateBuildingDto } from '../dto/create-building.dto';
+import type { UpdateBuildingDto } from '../dto/update-building.dto';
 
 @Injectable()
 export class PropertyBuildingService {
@@ -139,6 +140,44 @@ export class PropertyBuildingService {
     const row = await this.buildingRepo.findByIdForOrganization(id, organizationId);
     if (!row) throw new NotFoundException('Building not found');
     return this.mapBuildingRow(row);
+  }
+
+  public async updateBuilding(
+    id: string,
+    organizationId: string,
+    dto: UpdateBuildingDto
+  ): Promise<BuildingDto> {
+    const existing = await this.buildingRepo.findByIdForOrganization(id, organizationId);
+    if (!existing) throw new NotFoundException('Building not found');
+
+    try {
+      const row = await this.buildingRepo.updateForOrganization(id, organizationId, {
+        name: dto.name,
+        code: dto.code,
+        displayOrder: dto.displayOrder,
+        status: dto.status,
+      });
+      if (!row) throw new NotFoundException('Building not found after update');
+      return this.mapBuildingRow(row);
+    } catch (err: unknown) {
+      if ((err as { code?: string }).code === '23505') {
+        throw new ConflictException(`Building code '${dto.code}' already exists in this property`);
+      }
+      throw err;
+    }
+  }
+
+  public async deleteBuilding(id: string, organizationId: string): Promise<void> {
+    const existing = await this.buildingRepo.findByIdForOrganization(id, organizationId);
+    if (!existing) throw new NotFoundException('Building not found');
+
+    const floorCount = await this.buildingRepo.countFloorsInBuilding(id, organizationId);
+    if (floorCount > 0) {
+      throw new BadRequestException('Cannot delete building containing active floors');
+    }
+
+    const deleted = await this.buildingRepo.deleteForOrganization(id, organizationId);
+    if (!deleted) throw new NotFoundException('Building not found or already deleted');
   }
 
   // --- MAPPERS ---

@@ -29,7 +29,9 @@ export async function getPropertiesApi(params?: {
   search?: string;
   status?: string;
 }): Promise<PaginatedResult<PropertyDto>> {
-  const response = await apiClient.get<{ data: PaginatedResult<PropertyDto> }>('/properties', { params });
+  const response = await apiClient.get<{ data: PaginatedResult<PropertyDto> }>('/properties', {
+    params,
+  });
   return response.data.data;
 }
 
@@ -43,7 +45,10 @@ export async function createPropertyApi(data: CreatePropertyInput): Promise<Prop
   return response.data.data;
 }
 
-export async function updatePropertyApi(id: string, data: UpdatePropertyInput): Promise<PropertyDto> {
+export async function updatePropertyApi(
+  id: string,
+  data: UpdatePropertyInput
+): Promise<PropertyDto> {
   const response = await apiClient.put<{ data: PropertyDto }>(`/properties/${id}`, data);
   return response.data.data;
 }

@@ -38,7 +38,15 @@ export default function CreatePropertyScreen(): React.JSX.Element {
 
   const handleSubmit = () => {
     setErrorMsg(null);
-    if (!name.trim() || !code.trim() || !addressLine1.trim() || !locality.trim() || !city.trim() || !state.trim() || !postalCode.trim()) {
+    if (
+      !name.trim() ||
+      !code.trim() ||
+      !addressLine1.trim() ||
+      !locality.trim() ||
+      !city.trim() ||
+      !state.trim() ||
+      !postalCode.trim()
+    ) {
       setErrorMsg('Please fill in all required fields.');
       return;
     }
@@ -60,20 +68,74 @@ export default function CreatePropertyScreen(): React.JSX.Element {
       <Header title="Add New Property" subtitle="Enter property registration details" />
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         <Card>
-          <TextInput label="Property Name *" value={name} onChangeText={setName} placeholder="e.g. M Square Green Glen" />
-          <TextInput label="Property Code *" value={code} onChangeText={setCode} placeholder="e.g. PROP-01" autoCapitalize="characters" />
-          <TextInput label="Address Line 1 *" value={addressLine1} onChangeText={setAddressLine1} placeholder="Street / Building No." />
-          <TextInput label="Address Line 2" value={addressLine2} onChangeText={setAddressLine2} placeholder="Suite 400 (Optional)" />
-          <TextInput label="Locality *" value={locality} onChangeText={setLocality} placeholder="e.g. Bellandur" />
-          <TextInput label="City *" value={city} onChangeText={setCity} placeholder="e.g. Bengaluru" />
-          <TextInput label="State *" value={state} onChangeText={setState} placeholder="e.g. Karnataka" />
-          <TextInput label="Postal Code *" value={postalCode} onChangeText={setPostalCode} placeholder="e.g. 560103" keyboardType="numeric" />
+          <TextInput
+            label="Property Name *"
+            value={name}
+            onChangeText={setName}
+            placeholder="e.g. M Square Green Glen"
+          />
+          <TextInput
+            label="Property Code *"
+            value={code}
+            onChangeText={setCode}
+            placeholder="e.g. PROP-01"
+            autoCapitalize="characters"
+          />
+          <TextInput
+            label="Address Line 1 *"
+            value={addressLine1}
+            onChangeText={setAddressLine1}
+            placeholder="Street / Building No."
+          />
+          <TextInput
+            label="Address Line 2"
+            value={addressLine2}
+            onChangeText={setAddressLine2}
+            placeholder="Suite 400 (Optional)"
+          />
+          <TextInput
+            label="Locality *"
+            value={locality}
+            onChangeText={setLocality}
+            placeholder="e.g. Bellandur"
+          />
+          <TextInput
+            label="City *"
+            value={city}
+            onChangeText={setCity}
+            placeholder="e.g. Bengaluru"
+          />
+          <TextInput
+            label="State *"
+            value={state}
+            onChangeText={setState}
+            placeholder="e.g. Karnataka"
+          />
+          <TextInput
+            label="Postal Code *"
+            value={postalCode}
+            onChangeText={setPostalCode}
+            placeholder="e.g. 560103"
+            keyboardType="numeric"
+          />
 
-          {errorMsg ? <Button title={errorMsg} onPress={() => undefined} variant="danger" disabled /> : null}
+          {errorMsg ? (
+            <Button title={errorMsg} onPress={() => undefined} variant="danger" disabled />
+          ) : null}
 
           <View style={styles.buttonRow}>
-            <Button title="Cancel" onPress={() => router.back()} variant="outline" style={styles.halfBtn} />
-            <Button title="Save Property" onPress={handleSubmit} isLoading={mutation.isPending} style={styles.halfBtn} />
+            <Button
+              title="Cancel"
+              onPress={() => router.back()}
+              variant="outline"
+              style={styles.halfBtn}
+            />
+            <Button
+              title="Save Property"
+              onPress={handleSubmit}
+              isLoading={mutation.isPending}
+              style={styles.halfBtn}
+            />
           </View>
         </Card>
       </ScrollView>

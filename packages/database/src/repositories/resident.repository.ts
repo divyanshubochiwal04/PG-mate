@@ -2,6 +2,7 @@ import type { Kysely, Transaction } from 'kysely';
 import type { DatabaseSchema } from '../connection/database';
 import type { PaginatedResult, PaginationParams } from '@m-square/contracts';
 import { calculatePaginationBounds, createPaginatedResult } from '@m-square/contracts';
+import { KyselyResidentOperationalRepository } from './resident-operational.repository';
 
 export interface ResidentRow {
   id: string;
@@ -59,6 +60,16 @@ export interface UpdateResidentData {
   postalCode?: string | null;
   status?: string;
 }
+
+import type {
+  ResidentOperationalListItemDto,
+  ResidentOperationalListResponseDto,
+  ResidentOperationalQueryPayload,
+  ResidentOperationalSummaryDto,
+  ResidentStatus,
+  StayStatus,
+} from '@m-square/contracts';
+import { sql } from 'kysely';
 
 export class KyselyResidentRepository {
   constructor(private readonly db: Kysely<DatabaseSchema>) {}
@@ -148,13 +159,22 @@ export class KyselyResidentRepository {
     const countResult = await countQuery.executeTakeFirstOrThrow();
     const total = parseInt(countResult.total, 10);
 
-    const rows = await query
-      .orderBy('created_at', 'desc')
-      .offset(offset)
-      .limit(limit)
-      .execute();
+    const rows = await query.orderBy('created_at', 'desc').offset(offset).limit(limit).execute();
 
     return createPaginatedResult(rows as ResidentRow[], total, params.page, params.pageSize);
+  }
+
+  public async findOperationalList(
+    organizationId: string,
+    params: ResidentOperationalQueryPayload
+  ): Promise<ResidentOperationalListResponseDto> {
+    const opRepo = new KyselyResidentOperationalRepository(this.db);
+    return opRepo.findOperationalList(organizationId, params);
+  }
+
+  public async getOperationalSummary(organizationId: string): Promise<ResidentOperationalSummaryDto> {
+    const opRepo = new KyselyResidentOperationalRepository(this.db);
+    return opRepo.getOperationalSummary(organizationId);
   }
 
   public async createForOrganization(
