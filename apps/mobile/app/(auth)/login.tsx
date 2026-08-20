@@ -152,12 +152,12 @@ export default function LoginScreen(): React.JSX.Element {
               <Text style={typography.h3}>Backend Server URL</Text>
             </View>
             <Text style={styles.serverHint}>
-              Enter your backend API endpoint (e.g. laptop IP or ngrok tunnel):
+              API Endpoint (Render Cloud Production):
             </Text>
             <TextInput
               value={tempServerInput}
               onChangeText={setTempServerInput}
-              placeholder="http://10.87.2.159:3000/api/v1"
+              placeholder="https://pg-mate-n5b0.onrender.com/api/v1"
               autoCapitalize="none"
               autoCorrect={false}
               style={{ marginVertical: spacing.sm }}
