@@ -33,25 +33,6 @@ export default function RegisterScreen(): React.JSX.Element {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Server IP config state
-  const [serverUrl, setServerUrl] = useState(getApiBaseUrl());
-  const [serverModalVisible, setServerModalVisible] = useState(false);
-  const [tempServerInput, setTempServerInput] = useState(getApiBaseUrl());
-
-  const handleSaveServer = () => {
-    let clean = tempServerInput.trim();
-    if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
-      clean = `http://${clean}`;
-    }
-    if (!clean.endsWith('/api/v1')) {
-      clean = clean.replace(/\/$/, '') + '/api/v1';
-    }
-    setCustomApiBaseUrl(clean);
-    setServerUrl(clean);
-    setServerModalVisible(false);
-    Alert.alert('Server Connected', `API endpoint updated to: ${clean}`);
-  };
-
   const handleRegister = async (): Promise<void> => {
     setErrorMessage(null);
 
@@ -76,7 +57,7 @@ export default function RegisterScreen(): React.JSX.Element {
       setIsSubmitting(true);
       await register(email.trim(), password);
       Alert.alert(
-        '🎉 Welcome to M Square!',
+        '🎉 Welcome to PG.mate!',
         `Your new PG workspace "${pgName}" has been successfully provisioned.`,
         [
           {
@@ -105,7 +86,7 @@ export default function RegisterScreen(): React.JSX.Element {
             <View style={styles.iconCircle}>
               <Ionicons name="business" size={28} color="#FFFFFF" />
             </View>
-            <Text style={styles.brandTitle}>M SQUARE</Text>
+            <Text style={styles.brandTitle}>PG.MATE</Text>
             <Text style={styles.subtitle}>Register New PG / Hostel Account</Text>
             <Text style={styles.caption}>
               100% Isolated SaaS Workspace with custom rooms, billing & mess management.
@@ -194,60 +175,9 @@ export default function RegisterScreen(): React.JSX.Element {
                 <Text style={styles.loginLink}>Login Here</Text>
               </TouchableOpacity>
             </View>
-
-            {/* Server Connection Settings Pill */}
-            <TouchableOpacity
-              style={styles.serverPill}
-              onPress={() => {
-                setTempServerInput(serverUrl);
-                setServerModalVisible(true);
-              }}
-            >
-              <Ionicons name="wifi-outline" size={14} color={colors.primary} />
-              <Text style={styles.serverPillText} numberOfLines={1}>
-                Server: {serverUrl}
-              </Text>
-              <Ionicons name="pencil" size={12} color={colors.primary} />
-            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
-      {/* Server IP Config Modal */}
-      <Modal visible={serverModalVisible} transparent animationType="fade">
-        <View style={styles.serverModalOverlay}>
-          <View style={styles.serverModalContent}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.xs }}>
-              <Ionicons name="server" size={20} color={colors.primary} />
-              <Text style={typography.h3}>Backend Server URL</Text>
-            </View>
-            <Text style={styles.serverHint}>
-              Enter your backend API endpoint (e.g. laptop IP or ngrok tunnel):
-            </Text>
-            <TextInput
-              value={tempServerInput}
-              onChangeText={setTempServerInput}
-              placeholder="http://10.87.2.159:3000/api/v1"
-              autoCapitalize="none"
-              autoCorrect={false}
-              style={{ marginVertical: spacing.sm }}
-            />
-            <View style={{ flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs }}>
-              <Button
-                title="Cancel"
-                variant="outline"
-                onPress={() => setServerModalVisible(false)}
-                style={{ flex: 1 }}
-              />
-              <Button
-                title="Save & Connect"
-                onPress={handleSaveServer}
-                style={{ flex: 1.2 }}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
     </Screen>
   );
 }

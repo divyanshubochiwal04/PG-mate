@@ -610,7 +610,7 @@ export default function ResidentProfileScreen(): React.JSX.Element {
                   roomNumber: loc?.roomNumber || 'Assigned Room',
                   bedNumber: loc?.bedNumber,
                   amountDue: (summary as any)?.baseRent || (summary as any)?.monthlyRent || 8500,
-                  propertyName: loc?.propertyName || 'M Square PG',
+                  propertyName: loc?.propertyName || 'PG.mate',
                 }
               : null
           }
@@ -628,7 +628,7 @@ export default function ResidentProfileScreen(): React.JSX.Element {
                   residentPhone: resident.phone,
                   roomNumber: loc?.roomNumber || '101',
                   bedNumber: loc?.bedNumber,
-                  propertyName: loc?.propertyName || 'M Square PG',
+                  propertyName: loc?.propertyName || 'PG.mate',
                   lineItems: [
                     { description: 'Monthly Room Rent', amount: (summary as any)?.baseRent || (summary as any)?.monthlyRent || 8500 },
                     { description: 'Maintenance & Wi-Fi', amount: 500 },

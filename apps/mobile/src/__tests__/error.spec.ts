@@ -11,7 +11,7 @@ describe('apps/mobile — API Error Normalizer', () => {
   it('E2 — normalizes Network Error / offline connection failure', () => {
     const error = normalizeApiError({ request: {}, message: 'Network Error' });
     expect(error.statusCode).toBe(0);
-    expect(error.message).toContain('Unable to connect to M Square server');
+    expect(error.message).toContain('Unable to connect to PG.mate server');
   });
 
   it('E3 — extracts backend validation array messages', () => {

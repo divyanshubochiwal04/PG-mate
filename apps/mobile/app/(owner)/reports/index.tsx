@@ -145,24 +145,12 @@ export default function ReportsHubScreen(): React.JSX.Element {
   const handleExportMonthlyPL = async () => {
     const text =
       `📑 *MONTHLY P&L & OPERATIONAL AUDIT REPORT*\n` +
-      `🏢 *M Square PG & Co-Living*\n` +
+      `🏢 *PG.mate Platform*\n` +
       `📅 *Period*: ${new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })}\n` +
       `--------------------------------\n` +
-      `📈 *REVENUE & COLLECTIONS*:\n` +
-      `• Total Billed Rent: ₹1,42,000\n` +
-      `• Total Received (Collections): ₹1,28,000\n` +
-      `• Outstanding Rent Dues: ₹14,000 (90.1% Collection Rate)\n\n` +
-      `📉 *OPERATIONAL EXPENSES*:\n` +
-      `• Groceries & Kitchen Ration: ₹18,500\n` +
-      `• Cook & Housekeeping Salaries: ₹22,000\n` +
-      `• Electricity & Power Utilities: ₹8,400\n` +
-      `• Wi-Fi Internet & Maintenance: ₹3,500\n` +
-      `• Total Operational Expenses: ₹52,400\n` +
+      `📈 *LIVE OCCUPANCY*: ${dashboard?.occupancy?.occupancyPercentage || 0}% (${dashboard?.residents?.totalActiveResidents || 0} Active Residents)\n` +
       `--------------------------------\n` +
-      `💰 *REAL NET OPERATING PROFIT*: *₹75,600* (59.0% Margin)\n` +
-      `🛏️ *Live Occupancy*: ${dashboard?.occupancy?.occupancyPercentage || 85}% (${dashboard?.residents?.totalActiveResidents || 28} Active Residents)\n` +
-      `--------------------------------\n` +
-      `⚡ Generated via M Square Smart Management`;
+      `⚡ Generated via PG.mate Smart Management`;
 
     try {
       await Share.share({ message: text, title: 'Monthly P&L Report' });

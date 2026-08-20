@@ -49,7 +49,7 @@ export default function InventoryVisualMapScreen(): React.JSX.Element {
   };
 
   const handleShareAllVacancies = async () => {
-    const propertyName = selectedProperty?.name || 'M Square Properties';
+    const propertyName = selectedProperty?.name || 'PG.mate Properties';
     const text = `🏢 *${propertyName} — Live Room & Bed Vacancy List*\n\n` +
       `📊 *Current Availability:*\n` +
       `🟢 Total Vacant Beds: *${summary.availableCount}*\n` +

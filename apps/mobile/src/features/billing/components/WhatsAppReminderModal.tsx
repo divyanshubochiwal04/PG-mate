@@ -44,10 +44,10 @@ export function WhatsAppReminderModal({
 
   if (!data) return <></>;
 
-  const defaultUpi = data.ownerUpiId || 'paytmqr.msquare@paytm';
+  const defaultUpi = data.ownerUpiId || '';
   const month = data.monthName || 'Current Month';
   const dueDate = data.dueDate || 'Immediate';
-  const property = data.propertyName || 'M Square PG';
+  const property = data.propertyName || 'PG.mate';
 
   const getMessageText = () => {
     if (tone === 'URGENT') {

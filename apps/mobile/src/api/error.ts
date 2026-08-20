@@ -65,7 +65,7 @@ export function normalizeApiError(err: any): NormalizedApiError {
     err.message?.includes('timeout')
   ) {
     return {
-      message: 'Unable to connect to M Square server. Check your network connection.',
+      message: 'Unable to connect to PG.mate server. Check your network connection.',
       statusCode: 0,
       error: 'Network Error',
     };

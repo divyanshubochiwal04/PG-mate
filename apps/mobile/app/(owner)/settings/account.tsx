@@ -53,7 +53,7 @@ export default function AccountSettingsScreen(): React.JSX.Element {
           </Text>
 
           <Button
-            title="Logout from M Square"
+            title="Logout from PG.mate"
             variant="outline"
             onPress={handleLogout}
             style={styles.logoutBtn}

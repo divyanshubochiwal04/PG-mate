@@ -49,7 +49,7 @@ export function InvoiceReceiptModal({
 }: InvoiceReceiptModalProps): React.JSX.Element {
   if (!data) return <></>;
 
-  const property = data.propertyName || 'M Square PG & Co-Living';
+  const property = data.propertyName || 'PG.mate PG & Co-Living';
   const invoiceNo = data.invoiceNumber || `INV-${data.invoiceId.slice(0, 8).toUpperCase()}`;
   const dateStr = data.paymentDate || new Date().toLocaleDateString('en-IN', {
     day: '2-digit',
@@ -223,7 +223,7 @@ export function InvoiceReceiptModal({
               <View style={styles.paperFooter}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.thankYouText}>Thank you for choosing our PG!</Text>
-                  <Text style={styles.systemGenText}>Digitally generated receipt • M Square</Text>
+                  <Text style={styles.systemGenText}>Digitally generated receipt • PG.mate</Text>
                 </View>
                 <View style={styles.signBox}>
                   <Ionicons name="shield-checkmark" size={18} color="#16A34A" />

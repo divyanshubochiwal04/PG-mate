@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 export default function App(): React.JSX.Element {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>M Square Mobile</Text>
+      <Text style={styles.title}>PG.mate Mobile</Text>
       <Text style={styles.subtitle}>Hostel & PG Management System</Text>
       <View style={styles.badge}>
         <Text style={styles.badgeText}>Milestone 6 Ready</Text>

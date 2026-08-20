@@ -35,7 +35,7 @@ export function ElectricityCalculatorModal({
   visible,
   roomNumber,
   occupants = [],
-  propertyName = 'M Square PG',
+  propertyName = 'PG.mate',
   onClose,
   onApplySplitCharges,
   onSendInAppNotification,

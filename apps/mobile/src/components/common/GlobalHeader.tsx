@@ -18,7 +18,7 @@ export interface GlobalHeaderProps {
 }
 
 export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
-  title = 'M Square',
+  title = 'PG.mate',
   showBackButton,
   onBack,
   showPropertySelector = true,
@@ -31,7 +31,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
   const { data: unreadData } = useUnreadNotificationCount();
   const unreadCount = unreadData?.count || 0;
 
-  const shouldShowBack = showBackButton !== undefined ? showBackButton : title !== 'M Square';
+  const shouldShowBack = showBackButton !== undefined ? showBackButton : title !== 'PG.mate';
 
   const handleBackPress = () => {
     if (onBack) {
@@ -70,7 +70,7 @@ export const GlobalHeader: React.FC<GlobalHeaderProps> = ({
           <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail">
             {title}
           </Text>
-          {title === 'M Square' && <Text style={styles.brandSub}>PROPERTIES</Text>}
+          {title === 'PG.mate' && <Text style={styles.brandSub}>PROPERTIES</Text>}
         </View>
 
         <View style={styles.rightActions}>

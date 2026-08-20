@@ -788,7 +788,7 @@ export default function MenuManagementScreen(): React.JSX.Element {
       {/* Special Feast Broadcast Modal */}
       <SpecialMenuBroadcastModal
         visible={specialMenuModalVisible}
-        propertyName={activeMess?.name || 'M Square PG'}
+        propertyName={activeMess?.name || 'PG.mate'}
         onClose={() => setSpecialMenuModalVisible(false)}
       />
     </Screen>

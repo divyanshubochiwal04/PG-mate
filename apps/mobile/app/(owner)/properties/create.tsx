@@ -72,7 +72,7 @@ export default function CreatePropertyScreen(): React.JSX.Element {
             label="Property Name *"
             value={name}
             onChangeText={setName}
-            placeholder="e.g. M Square Green Glen"
+            placeholder="e.g. PG.mate Residency"
           />
           <TextInput
             label="Property Code *"

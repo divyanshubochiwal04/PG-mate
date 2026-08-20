@@ -46,8 +46,8 @@ export default function SettingsHubScreen(): React.JSX.Element {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={typography.h3}>{fullName}</Text>
-              <Text style={styles.userEmail}>{user?.email || 'owner@msquare.com'}</Text>
-              <Text style={styles.orgName}>{org?.name || 'M Square Living'}</Text>
+              <Text style={styles.userEmail}>{user?.email || 'owner@example.com'}</Text>
+              <Text style={styles.orgName}>{org?.name || 'PG.mate Living'}</Text>
             </View>
           </View>
         </Card>

@@ -20,57 +20,7 @@ interface ResidentLifecycleTimelineProps {
 export function ResidentLifecycleTimeline({
   events = [],
 }: ResidentLifecycleTimelineProps): React.JSX.Element {
-  // Default mock lifecycle events if none passed
-  const displayEvents: TimelineEvent[] =
-    events.length > 0
-      ? events
-      : [
-          {
-            id: '1',
-            type: 'ONBOARDING',
-            title: 'Resident Checked-In & Onboarded',
-            description: 'Assigned to Room 101 (Bed 1). Security deposit of ₹5,000 received.',
-            timestamp: '01 Jul 2026',
-            statusBadge: 'CHECKED IN',
-            badgeType: 'success',
-          },
-          {
-            id: '2',
-            type: 'PAYMENT',
-            title: 'July Rent Cleared',
-            description: '₹8,500 received via UPI (Ref #TXN8912). Receipt generated.',
-            timestamp: '05 Jul 2026',
-            statusBadge: 'PAID',
-            badgeType: 'success',
-          },
-          {
-            id: '3',
-            type: 'COMPLAINT',
-            title: 'AC Maintenance Ticket Resolved',
-            description: 'Filter cleaning and gas top-up completed by technician.',
-            timestamp: '18 Jul 2026',
-            statusBadge: 'RESOLVED',
-            badgeType: 'info',
-          },
-          {
-            id: '4',
-            type: 'BED_TRANSFER',
-            title: 'Room Upgraded / Shifted',
-            description: 'Transferred from Room 101 (Bed 1) to Room 102 (Bed 2 - AC Deluxe).',
-            timestamp: '01 Aug 2026',
-            statusBadge: 'TRANSFERRED',
-            badgeType: 'warning',
-          },
-          {
-            id: '5',
-            type: 'PAYMENT',
-            title: 'August Rent Cleared',
-            description: '₹9,500 received via PhonePe. Invoice #INV-2026-08 settled.',
-            timestamp: '06 Aug 2026',
-            statusBadge: 'PAID',
-            badgeType: 'success',
-          },
-        ];
+  const displayEvents: TimelineEvent[] = events;
 
   const getEventIcon = (type: TimelineEvent['type']) => {
     switch (type) {
@@ -98,63 +48,71 @@ export function ResidentLifecycleTimeline({
         <Text style={styles.headerTitle}>Resident Lifecycle Timeline</Text>
       </View>
 
-      <View style={styles.timelineList}>
-        {displayEvents.map((evt, index) => {
-          const isLast = index === displayEvents.length - 1;
-          const iconInfo = getEventIcon(evt.type);
+      {displayEvents.length === 0 ? (
+        <View style={{ paddingVertical: spacing.md, alignItems: 'center' }}>
+          <Text style={{ fontSize: 12, color: colors.textSecondary }}>
+            No lifecycle events recorded yet for this resident.
+          </Text>
+        </View>
+      ) : (
+        <View style={styles.timelineList}>
+          {displayEvents.map((evt, index) => {
+            const isLast = index === displayEvents.length - 1;
+            const iconInfo = getEventIcon(evt.type);
 
-          return (
-            <View key={evt.id} style={styles.timelineNode}>
-              {/* Left Column: Icon & Connecting Line */}
-              <View style={styles.leftCol}>
-                <View style={[styles.iconCircle, { backgroundColor: iconInfo.bg }]}>
-                  <Ionicons name={iconInfo.name as any} size={14} color={iconInfo.color} />
+            return (
+              <View key={evt.id} style={styles.timelineNode}>
+                {/* Left Column: Icon & Connecting Line */}
+                <View style={styles.leftCol}>
+                  <View style={[styles.iconCircle, { backgroundColor: iconInfo.bg }]}>
+                    <Ionicons name={iconInfo.name as any} size={14} color={iconInfo.color} />
+                  </View>
+                  {!isLast && <View style={styles.verticalLine} />}
                 </View>
-                {!isLast && <View style={styles.verticalLine} />}
-              </View>
 
-              {/* Right Column: Event Content Card */}
-              <View style={[styles.contentCard, isLast && { marginBottom: 0 }]}>
-                <View style={styles.contentTop}>
-                  <Text style={styles.eventTitle}>{evt.title}</Text>
-                  {Boolean(evt.statusBadge) && (
-                    <View
-                      style={[
-                        styles.badge,
-                        evt.badgeType === 'success'
-                          ? styles.badgeGreen
-                          : evt.badgeType === 'warning'
-                          ? styles.badgeAmber
-                          : evt.badgeType === 'danger'
-                          ? styles.badgeRed
-                          : styles.badgeBlue,
-                      ]}
-                    >
-                      <Text
+                {/* Right Column: Event Content Card */}
+                <View style={[styles.contentCard, isLast && { marginBottom: 0 }]}>
+                  <View style={styles.contentTop}>
+                    <Text style={styles.eventTitle}>{evt.title}</Text>
+                    {Boolean(evt.statusBadge) && (
+                      <View
                         style={[
-                          styles.badgeText,
+                          styles.badge,
                           evt.badgeType === 'success'
-                            ? styles.textGreen
+                            ? styles.badgeGreen
                             : evt.badgeType === 'warning'
-                            ? styles.textAmber
+                            ? styles.badgeAmber
                             : evt.badgeType === 'danger'
-                            ? styles.textRed
-                            : styles.textBlue,
+                            ? styles.badgeRed
+                            : styles.badgeBlue,
                         ]}
                       >
-                        {evt.statusBadge}
-                      </Text>
-                    </View>
-                  )}
-                </View>
+                        <Text
+                          style={[
+                            styles.badgeText,
+                            evt.badgeType === 'success'
+                              ? styles.textGreen
+                              : evt.badgeType === 'warning'
+                              ? styles.textAmber
+                              : evt.badgeType === 'danger'
+                              ? styles.textRed
+                              : styles.textBlue,
+                          ]}
+                        >
+                          {evt.statusBadge}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
 
-                <Text style={styles.eventDesc}>{evt.description}</Text>
-                <Text style={styles.eventTime}>{evt.timestamp}</Text>
+                  <Text style={styles.eventDesc}>{evt.description}</Text>
+                  <Text style={styles.eventTime}>{evt.timestamp}</Text>
+                </View>
               </View>
-            </View>
-          );
-        })}
-      </View>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 }

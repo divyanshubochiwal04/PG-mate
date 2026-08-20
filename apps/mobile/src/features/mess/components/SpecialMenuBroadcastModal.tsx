@@ -22,7 +22,7 @@ interface SpecialMenuBroadcastModalProps {
 
 export function SpecialMenuBroadcastModal({
   visible,
-  propertyName = 'M Square PG',
+  propertyName = 'PG.mate',
   onClose,
   onBroadcastInApp,
 }: SpecialMenuBroadcastModalProps): React.JSX.Element {

@@ -7,7 +7,7 @@ export default function IndexScreen(): React.JSX.Element {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return <Loading message="Initializing M Square..." />;
+    return <Loading message="Initializing PG.mate..." />;
   }
 
   if (isAuthenticated) {
