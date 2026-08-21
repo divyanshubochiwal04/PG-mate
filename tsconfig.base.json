@@ -14,7 +14,6 @@
     "declarationMap": true,
     "sourceMap": true,
     "isolatedModules": false,
-    "resolveJsonModule": true,
-    "incremental": true
+    "resolveJsonModule": true
   }
 }
