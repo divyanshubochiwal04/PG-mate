@@ -41,7 +41,8 @@ const redact_1 = require("./redact");
 const redactFormat = winston.format((info) => {
     return (0, redact_1.redactSensitiveData)(info);
 });
-const developmentFormat = winston.format.combine(winston.format.colorize(), winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), winston.format.printf(({ timestamp, level, message, ...meta }) => {
+const developmentFormat = winston.format.combine(winston.format.colorize(), winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), winston.format.printf((info) => {
+    const { timestamp, level, message, ...meta } = info;
     const metaStr = Object.keys(meta).length ? ` ${JSON.stringify(meta)}` : '';
     return `[${timestamp}] ${level}: ${message}${metaStr}`;
 }));

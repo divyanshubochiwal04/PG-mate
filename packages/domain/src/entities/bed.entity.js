@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BedEntity = void 0;
+const openapi = require("@nestjs/swagger");
 const base_entity_1 = require("./base.entity");
 const domain_error_1 = require("../errors/domain.error");
 class BedEntity extends base_entity_1.AggregateRoot {
@@ -34,6 +35,9 @@ class BedEntity extends base_entity_1.AggregateRoot {
      */
     countsTowardCapacity() {
         return this.props.status === 'AVAILABLE' || this.props.status === 'MAINTENANCE';
+    }
+    static _OPENAPI_METADATA_FACTORY() {
+        return {};
     }
 }
 exports.BedEntity = BedEntity;

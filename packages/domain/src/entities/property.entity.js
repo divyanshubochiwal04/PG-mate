@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PropertyEntity = void 0;
+const openapi = require("@nestjs/swagger");
 const base_entity_1 = require("./base.entity");
 const domain_error_1 = require("../errors/domain.error");
 class PropertyEntity extends base_entity_1.AggregateRoot {
@@ -49,6 +50,9 @@ class PropertyEntity extends base_entity_1.AggregateRoot {
     }
     isActive() {
         return this.props.status === 'ACTIVE';
+    }
+    static _OPENAPI_METADATA_FACTORY() {
+        return {};
     }
 }
 exports.PropertyEntity = PropertyEntity;
