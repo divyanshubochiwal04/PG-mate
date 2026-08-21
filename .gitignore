@@ -51,7 +51,9 @@ pnpm-debug.log*
 # Documentation & Internal Reports (Keep only root README.md)
 *.md
 !README.md
+!.agents/**
 docs/
 PG-mate/
+
 
 
