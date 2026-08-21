@@ -324,4 +324,82 @@ export class KyselyNotificationRepository implements NotificationRepository {
       throw err;
     }
   }
+
+  public async savePushToken(
+    userId: string,
+    organizationId: string,
+    pushToken: string,
+    deviceType = 'ANDROID'
+  ): Promise<void> {
+    if (!isValidUuid(userId) || !isValidUuid(organizationId) || !pushToken?.trim()) return;
+
+    try {
+      await this.db
+        .insertInto('user_push_tokens')
+        .values({
+          user_id: userId,
+          organization_id: organizationId,
+          push_token: pushToken.trim(),
+          device_type: deviceType,
+          created_at: new Date(),
+          updated_at: new Date(),
+        })
+        .onConflict((oc) =>
+          oc.columns(['user_id', 'push_token']).doUpdateSet({
+            organization_id: organizationId,
+            device_type: deviceType,
+            updated_at: new Date(),
+          })
+        )
+        .execute();
+    } catch (err) {
+      console.warn('Failed to save push token into database:', err);
+    }
+  }
+
+  public async getPushTokensForOrganization(organizationId: string): Promise<string[]> {
+    if (!isValidUuid(organizationId)) return [];
+
+    try {
+      const rows = await this.db
+        .selectFrom('user_push_tokens')
+        .select('push_token')
+        .where('organization_id', '=', organizationId)
+        .execute();
+      return rows.map((r) => r.push_token).filter(Boolean);
+    } catch (err) {
+      console.warn('Failed to fetch push tokens for organization:', err);
+      return [];
+    }
+  }
+
+  public async getPushTokensForUser(userId: string): Promise<string[]> {
+    if (!isValidUuid(userId)) return [];
+
+    try {
+      const rows = await this.db
+        .selectFrom('user_push_tokens')
+        .select('push_token')
+        .where('user_id', '=', userId)
+        .execute();
+      return rows.map((r) => r.push_token).filter(Boolean);
+    } catch (err) {
+      console.warn('Failed to fetch push tokens for user:', err);
+      return [];
+    }
+  }
+
+  public async deletePushToken(pushToken: string): Promise<void> {
+    if (!pushToken) return;
+
+    try {
+      await this.db
+        .deleteFrom('user_push_tokens')
+        .where('push_token', '=', pushToken)
+        .execute();
+    } catch (err) {
+      console.warn('Failed to delete invalid push token:', err);
+    }
+  }
 }
+

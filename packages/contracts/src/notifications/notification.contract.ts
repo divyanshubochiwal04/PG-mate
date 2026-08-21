@@ -97,3 +97,19 @@ export interface MarkNotificationReadDto {
 export interface ResolveNotificationDto {
   notes?: string;
 }
+
+export interface RegisterPushTokenDto {
+  pushToken: string;
+  deviceType?: 'ANDROID' | 'IOS' | 'WEB' | 'UNKNOWN';
+}
+
+export interface PushNotificationPayloadDto {
+  to?: string;
+  title: string;
+  body: string;
+  data?: Record<string, any>;
+  sound?: string;
+  badge?: number;
+  channelId?: string;
+}
+

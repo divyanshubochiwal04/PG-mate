@@ -6,6 +6,10 @@ import { useAuth } from '../../src/hooks/useAuth';
 import { Loading } from '../../src/components/ui/Loading';
 import { GlobalHeader } from '../../src/components/common/GlobalHeader';
 import { colors, radius, shadows, spacing } from '../../src/design-system';
+import {
+  registerForPushNotificationsAsync,
+  setupNotificationListeners,
+} from '../../src/features/notifications/services/push.manager';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -26,6 +30,19 @@ export default function OwnerLayout(): React.JSX.Element {
       router.replace('/(auth)/login');
     }
   }, [isAuthenticated, isLoading, router]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      registerForPushNotificationsAsync();
+      const cleanupListener = setupNotificationListeners((route) => {
+        if (route) {
+          router.push(route as never);
+        }
+      });
+      return cleanupListener;
+    }
+  }, [isAuthenticated, router]);
+
 
   if (isLoading) {
     return <Loading message="Authenticating..." />;

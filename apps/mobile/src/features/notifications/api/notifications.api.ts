@@ -54,3 +54,15 @@ export async function generateNotificationsApi(): Promise<{ generatedCount: numb
   return response.data?.data ?? response.data;
 }
 
+export async function registerPushTokenApi(
+  pushToken: string,
+  deviceType: 'ANDROID' | 'IOS' | 'WEB' | 'UNKNOWN' = 'ANDROID'
+): Promise<{ success: boolean }> {
+  const response = await apiClient.post<{ data: { success: boolean } }>('/notifications/push-token', {
+    pushToken,
+    deviceType,
+  });
+  return response.data?.data ?? response.data;
+}
+
+

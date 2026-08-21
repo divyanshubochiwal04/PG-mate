@@ -21,12 +21,15 @@ import type {
 import type { CreateTaskDto } from './dto/create-task.dto';
 import type { UpdateTaskDto } from './dto/update-task.dto';
 import type { AssignTaskDto } from './dto/assign-task.dto';
+import { PushNotificationService } from '../notifications/push-notification.service';
 
 @Injectable()
 export class TaskService {
   private readonly db = dbService.db;
   private readonly taskRepo = new KyselyTaskRepository(this.db);
   private readonly unitOfWork = new KyselyUnitOfWork(this.db);
+  private readonly pushService = new PushNotificationService();
+
 
   private mapToDto(row: TaskRow): TaskDto {
     return {
@@ -237,9 +240,25 @@ export class TaskService {
         console.warn('Failed to insert in-app notification for task creation:', notifErr);
       }
 
-      return this.mapToDto(task);
+      const taskDto = this.mapToDto(task);
+
+      this.pushService
+        .sendToOrganization(orgId, {
+          title: `New Task: ${dto.title}`,
+          body: dto.description
+            ? `${dto.description.substring(0, 100)}`
+            : `New ${dto.priority || 'MEDIUM'} maintenance task has been created.`,
+          data: {
+            actionRoute: `/(owner)/tasks/${task.id}`,
+            taskId: task.id,
+          },
+        })
+        .catch((err) => console.warn('Task push notification dispatch error:', err));
+
+      return taskDto;
     });
   }
+
 
   public async listTasks(organizationId: string, query: TaskQueryDto): Promise<TaskListResponseDto> {
     const orgId = this.extractId(organizationId);

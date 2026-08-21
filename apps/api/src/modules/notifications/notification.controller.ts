@@ -19,7 +19,13 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { TenantAuthorizationGuard } from '../tenant/guards/tenant-authorization.guard';
 import { CurrentOrganization } from '../tenant/decorators/current-organization.decorator';
-import type { NotificationDto, NotificationListResponseDto, OrganizationDto } from '@m-square/contracts';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type {
+  NotificationDto,
+  NotificationListResponseDto,
+  OrganizationDto,
+  RegisterPushTokenDto,
+} from '@m-square/contracts';
 import { NotificationService } from './notification.service';
 import { NotificationQueryDto } from './dto/notification-query.dto';
 import { CreateNotificationDto } from './dto/create-notification.dto';
@@ -29,6 +35,19 @@ import { CreateNotificationDto } from './dto/create-notification.dto';
 @UseGuards(JwtAuthGuard, TenantAuthorizationGuard)
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
+
+  @Post('push-token')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth('bearer-auth')
+  @ApiOperation({ summary: 'Register or refresh device push token' })
+  @SwaggerResponse({ status: 200, description: 'Push token registered successfully' })
+  async registerPushToken(
+    @CurrentUser('id') userId: string,
+    @CurrentOrganization('id') organizationId: string,
+    @Body() dto: RegisterPushTokenDto
+  ): Promise<{ success: boolean }> {
+    return this.notificationService.registerPushToken(userId, organizationId, dto);
+  }
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -41,6 +60,7 @@ export class NotificationController {
   ): Promise<NotificationListResponseDto> {
     return this.notificationService.listNotifications(organization.id, query);
   }
+
 
   @Get('unread-count')
   @HttpCode(HttpStatus.OK)

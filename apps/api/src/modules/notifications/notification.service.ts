@@ -14,14 +14,17 @@ import type {
   NotificationListResponseDto,
   NotificationQueryDto,
   NotificationType,
+  RegisterPushTokenDto,
 } from '@m-square/contracts';
 import { NotificationDetectorService } from './notification-detector.service';
+import { PushNotificationService } from './push-notification.service';
 
 @Injectable()
 export class NotificationService {
   private readonly db = dbService.db;
   private readonly notificationRepo = new KyselyNotificationRepository(this.db);
   private readonly detectorService = new NotificationDetectorService();
+  private readonly pushService = new PushNotificationService();
 
   private mapToDto(row: NotificationRow): NotificationDto {
     return {
@@ -152,7 +155,39 @@ export class NotificationService {
       resolved_at: null,
       expires_at: null,
     });
+
+    // Asynchronously dispatch push notification to registered devices
+    this.pushService
+      .sendToOrganization(organizationId, {
+        title: dto.title,
+        body: dto.message,
+        data: {
+          actionRoute: dto.actionRoute,
+          notificationId: created.id,
+          entityType: dto.entityType,
+          entityId: dto.entityId,
+        },
+      })
+      .catch((err) => console.warn('Push dispatch error:', err));
+
     return this.mapToDto(created);
+  }
+
+  public async registerPushToken(
+    userId: string,
+    organizationId: string,
+    dto: RegisterPushTokenDto
+  ): Promise<{ success: boolean }> {
+    if (!dto.pushToken?.trim()) {
+      throw new BadRequestException('pushToken is required');
+    }
+    await this.notificationRepo.savePushToken(
+      userId,
+      organizationId,
+      dto.pushToken.trim(),
+      dto.deviceType || 'ANDROID'
+    );
+    return { success: true };
   }
 
   public async generateOperationalNotifications(
@@ -161,3 +196,4 @@ export class NotificationService {
     return this.detectorService.generateOperationalNotifications(organizationId);
   }
 }
+

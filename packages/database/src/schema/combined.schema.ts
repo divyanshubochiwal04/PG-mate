@@ -95,6 +95,7 @@ import type {
   ReceiptsTable,
 } from './billing.schema';
 import type { NotificationsTable } from './notification.schema';
+import type { UserPushTokensTable } from './push-token.schema';
 import type { TaskActivitiesTable, TasksTable } from './task.schema';
 
 export interface BillingDatabaseSchema {
@@ -108,7 +109,9 @@ export interface BillingDatabaseSchema {
 
 export interface NotificationDatabaseSchema {
   notifications: NotificationsTable;
+  user_push_tokens: UserPushTokensTable;
 }
+
 
 export interface TaskDatabaseSchema {
   tasks: TasksTable;
