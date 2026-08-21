@@ -31,7 +31,7 @@ export class TaskController {
 
   @Get()
   public async listTasks(
-    @CurrentOrganization() organizationId: string,
+    @CurrentOrganization('id') organizationId: string,
     @Query() query: TaskQueryDto
   ): Promise<TaskListResponseDto> {
     return this.taskService.listTasks(organizationId, query);
@@ -39,7 +39,7 @@ export class TaskController {
 
   @Get('summary')
   public async getSummary(
-    @CurrentOrganization() organizationId: string,
+    @CurrentOrganization('id') organizationId: string,
     @CurrentUser('id') userId: string
   ): Promise<TaskSummaryDto> {
     return this.taskService.getSummary(organizationId, userId);
@@ -47,7 +47,7 @@ export class TaskController {
 
   @Get('resident/:residentId')
   public async getResidentTasks(
-    @CurrentOrganization() organizationId: string,
+    @CurrentOrganization('id') organizationId: string,
     @Param('residentId') residentId: string
   ): Promise<TaskDto[]> {
     return this.taskService.getResidentTasks(residentId, organizationId);
@@ -55,7 +55,7 @@ export class TaskController {
 
   @Get(':id')
   public async getTask(
-    @CurrentOrganization() organizationId: string,
+    @CurrentOrganization('id') organizationId: string,
     @Param('id') id: string
   ): Promise<TaskDto> {
     return this.taskService.getTask(id, organizationId);
@@ -63,7 +63,7 @@ export class TaskController {
 
   @Post()
   public async createTask(
-    @CurrentOrganization() organizationId: string,
+    @CurrentOrganization('id') organizationId: string,
     @CurrentUser('id') userId: string,
     @Body() dto: CreateTaskDto
   ): Promise<TaskDto> {
@@ -72,7 +72,7 @@ export class TaskController {
 
   @Patch(':id')
   public async updateTask(
-    @CurrentOrganization() organizationId: string,
+    @CurrentOrganization('id') organizationId: string,
     @CurrentUser('id') userId: string,
     @Param('id') id: string,
     @Body() dto: UpdateTaskDto
@@ -82,7 +82,7 @@ export class TaskController {
 
   @Post(':id/start')
   public async startTask(
-    @CurrentOrganization() organizationId: string,
+    @CurrentOrganization('id') organizationId: string,
     @CurrentUser('id') userId: string,
     @Param('id') id: string
   ): Promise<TaskDto> {
@@ -91,7 +91,7 @@ export class TaskController {
 
   @Post(':id/complete')
   public async completeTask(
-    @CurrentOrganization() organizationId: string,
+    @CurrentOrganization('id') organizationId: string,
     @CurrentUser('id') userId: string,
     @Param('id') id: string
   ): Promise<TaskDto> {
@@ -100,7 +100,7 @@ export class TaskController {
 
   @Post(':id/cancel')
   public async cancelTask(
-    @CurrentOrganization() organizationId: string,
+    @CurrentOrganization('id') organizationId: string,
     @CurrentUser('id') userId: string,
     @Param('id') id: string
   ): Promise<TaskDto> {
@@ -109,7 +109,7 @@ export class TaskController {
 
   @Post(':id/reopen')
   public async reopenTask(
-    @CurrentOrganization() organizationId: string,
+    @CurrentOrganization('id') organizationId: string,
     @CurrentUser('id') userId: string,
     @Param('id') id: string
   ): Promise<TaskDto> {
@@ -118,7 +118,7 @@ export class TaskController {
 
   @Post(':id/assign')
   public async assignTask(
-    @CurrentOrganization() organizationId: string,
+    @CurrentOrganization('id') organizationId: string,
     @CurrentUser('id') userId: string,
     @Param('id') id: string,
     @Body() dto: AssignTaskDto
@@ -128,7 +128,7 @@ export class TaskController {
 
   @Post(':id/unassign')
   public async unassignTask(
-    @CurrentOrganization() organizationId: string,
+    @CurrentOrganization('id') organizationId: string,
     @CurrentUser('id') userId: string,
     @Param('id') id: string
   ): Promise<TaskDto> {
@@ -137,7 +137,7 @@ export class TaskController {
 
   @Get(':id/activity')
   public async getTaskActivities(
-    @CurrentOrganization() organizationId: string,
+    @CurrentOrganization('id') organizationId: string,
     @Param('id') id: string
   ): Promise<TaskActivityDto[]> {
     return this.taskService.getTaskActivities(id, organizationId);
