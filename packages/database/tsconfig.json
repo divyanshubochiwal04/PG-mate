@@ -2,15 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
-    "baseUrl": ".",
-    "paths": {
-      "@m-square/config": ["../config/dist/index.d.ts"],
-      "@m-square/logger": ["../logger/dist/index.d.ts"],
-      "@m-square/domain": ["../domain/dist/index.d.ts"],
-      "@m-square/contracts": ["../contracts/dist/index.d.ts"],
-      "@m-square/security": ["../security/dist/index.d.ts"]
-    }
+    "rootDir": "./src"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "src/**/__tests__/**", "src/**/*.spec.ts", "src/**/*.test.ts", "src/scripts/**"]

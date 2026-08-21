@@ -3,15 +3,6 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": ".",
-    "paths": {
-      "@m-square/config": ["../../packages/config/dist/index.d.ts"],
-      "@m-square/logger": ["../../packages/logger/dist/index.d.ts"],
-      "@m-square/domain": ["../../packages/domain/dist/index.d.ts"],
-      "@m-square/contracts": ["../../packages/contracts/dist/index.d.ts"],
-      "@m-square/security": ["../../packages/security/dist/index.d.ts"],
-      "@m-square/database": ["../../packages/database/dist/index.d.ts"]
-    },
     "typeRoots": ["../../node_modules/@types", "./node_modules/@types"]
   },
   "include": ["src/**/*"],
