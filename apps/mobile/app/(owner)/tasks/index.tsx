@@ -76,7 +76,11 @@ export default function TaskCenterScreen(): React.JSX.Element {
     await createTaskMutation.mutateAsync(dto);
   };
 
-  const tasks = tasksData?.data || [];
+  const tasks: any[] = Array.isArray(tasksData?.data)
+    ? tasksData.data
+    : Array.isArray(tasksData)
+    ? (tasksData as any)
+    : [];
   const totalTasks = summary?.totalTasks || 0;
   const completedTasks = summary?.completedTasks || 0;
   const overdueTasks = summary?.overdueTasks || 0;
