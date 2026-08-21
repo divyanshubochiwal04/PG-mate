@@ -216,6 +216,27 @@ export class TaskService {
         trx
       );
 
+      try {
+        await trx
+          .insertInto('notifications')
+          .values({
+            organization_id: orgId,
+            type: dto.priority === 'CRITICAL' ? 'TASK_CRITICAL' : 'SYSTEM',
+            severity: dto.priority === 'CRITICAL' ? 'CRITICAL' : dto.priority === 'HIGH' ? 'WARNING' : 'INFO',
+            title: `New Task: ${dto.title}`,
+            message: dto.description
+              ? `${dto.description.substring(0, 120)}`
+              : `New ${dto.priority || 'MEDIUM'} priority maintenance task created.`,
+            entity_type: 'TASK',
+            entity_id: task.id,
+            action_route: `/(owner)/tasks/${task.id}`,
+            status: 'UNREAD',
+          })
+          .execute();
+      } catch (notifErr) {
+        console.warn('Failed to insert in-app notification for task creation:', notifErr);
+      }
+
       return this.mapToDto(task);
     });
   }

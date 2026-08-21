@@ -68,7 +68,11 @@ export default function NotificationCenterScreen(): React.JSX.Element {
     return `${days}d ago`;
   };
 
-  const allNotifications = data?.data || [];
+  const allNotifications: NotificationDto[] = Array.isArray(data?.data)
+    ? data.data
+    : Array.isArray(data)
+    ? (data as any)
+    : [];
   const notifications =
     activeTab === 'TASKS'
       ? allNotifications.filter(
@@ -76,7 +80,7 @@ export default function NotificationCenterScreen(): React.JSX.Element {
         )
       : allNotifications;
 
-  const unreadCount = data?.unreadCount || 0;
+  const unreadCount = typeof data?.unreadCount === 'number' ? data.unreadCount : 0;
 
   return (
     <Screen style={styles.screen}>
