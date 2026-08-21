@@ -167,12 +167,42 @@ export default function BillingDashboardScreen(): React.JSX.Element {
         ...dto,
         idempotencyKey: `pay-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       });
-      Alert.alert('Payment Recorded', `Successfully collected ₹${dto.amount.toLocaleString('en-IN')}`);
+
       handleRefresh();
+
+      if (selectedInvoice) {
+        const updatedPaid = (selectedInvoice.paidAmount || 0) + dto.amount;
+        const updatedBalance = Math.max(0, (selectedInvoice.totalAmount || 0) - updatedPaid);
+
+        setReceiptData({
+          invoiceId: selectedInvoice.id,
+          invoiceNumber: selectedInvoice.invoiceNumber,
+          residentName: (selectedInvoice as any).residentName || 'Resident',
+          roomNumber: (selectedInvoice as any).roomNumber || 'Room',
+          lineItems: selectedInvoice.items?.map((it: any) => ({
+            description: it.description,
+            amount: it.amount || it.totalAmount || 0,
+          })) || [
+            { description: 'Monthly Room Rent & Utilities', amount: selectedInvoice.totalAmount },
+          ],
+          totalAmount: selectedInvoice.totalAmount,
+          paidAmount: updatedPaid,
+          balanceAmount: updatedBalance,
+          paymentMethod: dto.paymentMethod,
+          transactionId: dto.referenceNumber,
+          paymentDate: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+          status: updatedBalance <= 0 ? 'PAID' : 'PARTIAL',
+        });
+        setReceiptModalVisible(true);
+      } else {
+        Alert.alert('Payment Recorded', `Successfully collected ₹${dto.amount.toLocaleString('en-IN')}`);
+      }
     } catch (err: unknown) {
       Alert.alert('Payment Failed', getErrorMessage(err, 'Failed to record payment.'));
     }
   };
+
+
 
   return (
     <Screen style={styles.screen}>

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Linking,
   Modal,
@@ -13,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import type { InvoiceDto } from '@m-square/contracts';
 import { colors, radius, spacing, typography } from '../../../design-system';
+import { printReceiptPdf, shareReceiptPdf } from '../services/receipt-pdf.service';
 
 export interface ReceiptData {
   invoiceId: string;
@@ -47,6 +49,8 @@ export function InvoiceReceiptModal({
   onClose,
   onSendInAppNotification,
 }: InvoiceReceiptModalProps): React.JSX.Element {
+  const [isPdfLoading, setIsPdfLoading] = useState(false);
+
   if (!data) return <></>;
 
   const property = data.propertyName || 'PG.mate PG & Co-Living';
@@ -81,6 +85,34 @@ export function InvoiceReceiptModal({
     );
   };
 
+  const handleSharePdf = async () => {
+    try {
+      setIsPdfLoading(true);
+      await shareReceiptPdf(data);
+      if (onSendInAppNotification) {
+        onSendInAppNotification(
+          `PDF Receipt Generated`,
+          `Branded receipt PDF generated for ${data.residentName} (₹${data.paidAmount.toLocaleString('en-IN')}).`
+        );
+      }
+    } catch (err) {
+      Alert.alert('Error', 'Could not generate PDF receipt.');
+    } finally {
+      setIsPdfLoading(false);
+    }
+  };
+
+  const handlePrintPdf = async () => {
+    try {
+      setIsPdfLoading(true);
+      await printReceiptPdf(data);
+    } catch (err) {
+      Alert.alert('Error', 'Could not print receipt.');
+    } finally {
+      setIsPdfLoading(false);
+    }
+  };
+
   const handleShareWhatsApp = async () => {
     const text = getReceiptText();
     let phone = data.residentPhone ? data.residentPhone.replace(/[^0-9]/g, '') : '';
@@ -113,10 +145,6 @@ export function InvoiceReceiptModal({
     }
   };
 
-  const handleNativeShare = async () => {
-    const text = getReceiptText();
-    await Share.share({ message: text, title: `Receipt ${invoiceNo}` });
-  };
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -236,23 +264,42 @@ export function InvoiceReceiptModal({
           {/* Action Buttons */}
           <View style={styles.footerActions}>
             <TouchableOpacity
-              style={styles.shareBtn}
-              onPress={handleNativeShare}
+              style={styles.pdfBtn}
+              onPress={handleSharePdf}
+              disabled={isPdfLoading}
               accessibilityRole="button"
             >
-              <Ionicons name="share-social-outline" size={18} color={colors.primary} />
-              <Text style={styles.shareBtnText}>Share / Print</Text>
+              {isPdfLoading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <>
+                  <Ionicons name="document-text" size={18} color="#FFFFFF" />
+                  <Text style={styles.pdfBtnText}>Share PDF</Text>
+                </>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.printBtn}
+              onPress={handlePrintPdf}
+              disabled={isPdfLoading}
+              accessibilityRole="button"
+            >
+              <Ionicons name="print-outline" size={18} color={colors.textPrimary} />
+              <Text style={styles.printBtnText}>Print</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.whatsappBtn}
               onPress={handleShareWhatsApp}
+              disabled={isPdfLoading}
               accessibilityRole="button"
             >
               <Ionicons name="logo-whatsapp" size={18} color="#FFFFFF" />
-              <Text style={styles.whatsappBtnText}>Send on WhatsApp</Text>
+              <Text style={styles.whatsappBtnText}>WhatsApp</Text>
             </TouchableOpacity>
           </View>
+
         </View>
       </View>
     </Modal>
@@ -482,29 +529,49 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
-  shareBtn: {
-    flex: 1,
+  pdfBtn: {
+    flex: 1.4,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
     height: 48,
     borderRadius: radius.md,
-    borderWidth: 1.5,
-    borderColor: colors.primary,
-    backgroundColor: colors.surface,
+    backgroundColor: '#4F46E5',
+    shadowColor: '#4F46E5',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  shareBtnText: {
+  pdfBtnText: {
     fontSize: 13,
     fontWeight: '700',
-    color: colors.primary,
+    color: '#FFFFFF',
   },
-  whatsappBtn: {
-    flex: 1.2,
+  printBtn: {
+    flex: 0.8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 4,
+    height: 48,
+    borderRadius: radius.md,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  printBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.textPrimary,
+  },
+  whatsappBtn: {
+    flex: 1.1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
     height: 48,
     borderRadius: radius.md,
     backgroundColor: '#16A34A',
