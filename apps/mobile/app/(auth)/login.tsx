@@ -65,7 +65,7 @@ export default function LoginScreen(): React.JSX.Element {
           label="Email Address"
           value={email}
           onChangeText={setEmail}
-          placeholder="owner@example.com"
+          placeholder="Enter your email"
           keyboardType="email-address"
           autoCapitalize="none"
           returnKeyType="next"

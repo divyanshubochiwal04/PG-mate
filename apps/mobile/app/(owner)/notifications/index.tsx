@@ -25,7 +25,7 @@ import {
 import { useCreateTask } from '../../../src/features/tasks/hooks/useTasks';
 import { colors, radius, spacing, typography } from '../../../src/design-system';
 
-type FilterTab = 'ALL' | 'UNREAD' | 'CRITICAL' | 'WARNING' | 'INFO';
+type FilterTab = 'ALL' | 'UNREAD' | 'TASKS' | 'CRITICAL' | 'WARNING' | 'INFO';
 
 export default function NotificationCenterScreen(): React.JSX.Element {
   const router = useRouter();
@@ -42,7 +42,6 @@ export default function NotificationCenterScreen(): React.JSX.Element {
   const { data, isLoading, refetch, isRefetching } = useNotifications(queryParams);
   const markReadMutation = useMarkNotificationRead();
   const markAllReadMutation = useMarkAllNotificationsRead();
-  const createTaskMutation = useCreateTask();
 
   const handleNotificationPress = async (notification: NotificationDto) => {
     if (notification.status === 'UNREAD') {
@@ -69,7 +68,14 @@ export default function NotificationCenterScreen(): React.JSX.Element {
     return `${days}d ago`;
   };
 
-  const notifications = data?.data || [];
+  const allNotifications = data?.data || [];
+  const notifications =
+    activeTab === 'TASKS'
+      ? allNotifications.filter(
+          (n) => n.type === 'TASK_OVERDUE' || n.type === 'TASK_CRITICAL' || n.entityType === 'TASK'
+        )
+      : allNotifications;
+
   const unreadCount = data?.unreadCount || 0;
 
   return (
@@ -77,9 +83,9 @@ export default function NotificationCenterScreen(): React.JSX.Element {
       <View style={styles.container}>
         <View style={styles.header}>
           <View style={{ flex: 1 }}>
-            <Text style={typography.h2}>Notifications</Text>
+            <Text style={typography.h2}>Notifications & Reminders</Text>
             <Text style={styles.subtitle}>
-              {unreadCount > 0 ? `${unreadCount} unread operational alerts` : 'All notifications caught up'}
+              {unreadCount > 0 ? `${unreadCount} unread operational alerts & reminders` : 'All alerts and task reminders caught up'}
             </Text>
           </View>
           {unreadCount > 0 && (
@@ -96,11 +102,12 @@ export default function NotificationCenterScreen(): React.JSX.Element {
 
         {/* Filter Tabs */}
         <View style={styles.tabRow}>
-          {(['ALL', 'UNREAD', 'CRITICAL', 'WARNING', 'INFO'] as const).map((tab) => (
+          {(['ALL', 'UNREAD', 'TASKS', 'CRITICAL', 'WARNING', 'INFO'] as const).map((tab) => (
             <TouchableOpacity
               key={tab}
               style={[styles.tabChip, activeTab === tab && styles.tabChipActive]}
               onPress={() => setActiveTab(tab)}
+              accessibilityRole="button"
             >
               <Text style={[styles.tabChipText, activeTab === tab && styles.tabChipTextActive]}>
                 {tab}
@@ -109,7 +116,7 @@ export default function NotificationCenterScreen(): React.JSX.Element {
           ))}
         </View>
 
-        {/* Notifications List */}
+        {/* Notification List */}
         {isLoading ? (
           <View style={styles.loadingWrap}>
             <SkeletonLoader height={80} style={{ marginBottom: spacing.sm }} />
@@ -120,7 +127,7 @@ export default function NotificationCenterScreen(): React.JSX.Element {
           <EmptyState
             icon="notifications-off-outline"
             title="No Notifications"
-            description="You are all caught up! No operational alerts in this category."
+            description="You are all caught up! No operational alerts or task reminders in this category."
           />
         ) : (
           <FlatList
@@ -130,6 +137,10 @@ export default function NotificationCenterScreen(): React.JSX.Element {
             contentContainerStyle={styles.listContent}
             renderItem={({ item }) => {
               const isUnread = item.status === 'UNREAD';
+              const isTaskReminder =
+                item.type === 'TASK_OVERDUE' ||
+                item.type === 'TASK_CRITICAL' ||
+                item.entityType === 'TASK';
 
               return (
                 <TouchableOpacity
@@ -139,6 +150,12 @@ export default function NotificationCenterScreen(): React.JSX.Element {
                   <Card style={[styles.notifCard, isUnread && styles.notifUnreadCard]}>
                     <View style={styles.notifHeader}>
                       <View style={styles.notifBadgeGroup}>
+                        {isTaskReminder && (
+                          <View style={styles.taskBadge}>
+                            <Ionicons name="clipboard" size={11} color="#2563EB" />
+                            <Text style={styles.taskBadgeText}>TASK REMINDER</Text>
+                          </View>
+                        )}
                         <StatusBadge
                           status={
                             item.severity === 'CRITICAL'
@@ -163,7 +180,9 @@ export default function NotificationCenterScreen(): React.JSX.Element {
                     <View style={styles.notifFooter}>
                       {Boolean(item.actionRoute) && (
                         <View style={styles.routeAction}>
-                          <Text style={styles.actionRouteText}>Open Details</Text>
+                          <Text style={styles.actionRouteText}>
+                            {isTaskReminder ? 'Open Task →' : 'Open Details'}
+                          </Text>
                           <Ionicons name="arrow-forward" size={12} color={colors.primary} />
                         </View>
                       )}
@@ -312,5 +331,20 @@ const styles = StyleSheet.create({
   markReadText: {
     ...typography.caption,
     color: colors.textSecondary,
+  },
+  taskBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: radius.pill,
+    marginRight: 4,
+  },
+  taskBadgeText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#2563EB',
   },
 });

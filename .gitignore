@@ -52,4 +52,6 @@ pnpm-debug.log*
 *.md
 !README.md
 docs/
+PG-mate/
+
 

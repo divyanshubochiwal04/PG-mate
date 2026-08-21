@@ -58,6 +58,12 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       });
     }
 
+    const req = ctx.getRequest<any>();
+    console.error(
+      `🚨 [API ERROR ${status}] ${req?.method || ''} ${req?.url || ''} -> [${errorCode}]: ${message}`,
+      details ? JSON.stringify(details) : (exception instanceof Error ? exception.stack || exception.message : '')
+    );
+
     const payload: ApiErrorResponse = {
       success: false,
       error: {

@@ -352,6 +352,98 @@ export class NotificationDetectorService {
       }
     }
 
+    // 7. TASK OVERDUE REMINDERS
+    const overdueTasks = await this.db
+      .selectFrom('tasks')
+      .selectAll()
+      .where('organization_id', '=', organizationId)
+      .where('status', 'in', ['TODO', 'IN_PROGRESS'])
+      .where('due_date', '<', new Date())
+      .execute();
+
+    const currentOverdueTaskIds = new Set<string>();
+    for (const task of overdueTasks) {
+      currentOverdueTaskIds.add(task.id);
+      const dedupeKey = `TASK_OVERDUE:${task.id}`;
+      const created = await this.notificationRepo.createIfNotExists(organizationId, {
+        type: 'TASK_OVERDUE',
+        severity: task.priority === 'CRITICAL' ? 'CRITICAL' : 'WARNING',
+        title: `Task Overdue: ${task.title}`,
+        message: `Operational task "${task.title}" is past its due date. Tap to take action.`,
+        entity_type: 'TASK',
+        entity_id: task.id,
+        action_route: `/(owner)/tasks/${task.id}`,
+        metadata: { taskId: task.id, priority: task.priority, dueDate: task.due_date },
+        dedupe_key: dedupeKey,
+        status: 'UNREAD',
+        read_at: null,
+        resolved_at: null,
+        expires_at: null,
+      });
+      if (created) generatedCount++;
+    }
+
+    const activeTaskOverdueNotifs = await this.db
+      .selectFrom('notifications')
+      .selectAll()
+      .where('organization_id', '=', organizationId)
+      .where('type', '=', 'TASK_OVERDUE')
+      .where('status', 'in', ['UNREAD', 'READ'])
+      .execute();
+
+    for (const notif of activeTaskOverdueNotifs) {
+      if (notif.entity_id && !currentOverdueTaskIds.has(notif.entity_id)) {
+        await this.notificationRepo.resolve(notif.id, organizationId);
+        resolvedCount++;
+      }
+    }
+
+    // 8. CRITICAL PENDING TASKS
+    const criticalTasks = await this.db
+      .selectFrom('tasks')
+      .selectAll()
+      .where('organization_id', '=', organizationId)
+      .where('priority', '=', 'CRITICAL')
+      .where('status', 'in', ['TODO', 'IN_PROGRESS'])
+      .execute();
+
+    const currentCriticalTaskIds = new Set<string>();
+    for (const task of criticalTasks) {
+      currentCriticalTaskIds.add(task.id);
+      const dedupeKey = `TASK_CRITICAL:${task.id}`;
+      const created = await this.notificationRepo.createIfNotExists(organizationId, {
+        type: 'TASK_CRITICAL',
+        severity: 'CRITICAL',
+        title: `Critical Task Alert`,
+        message: `High urgency follow-up required: "${task.title}".`,
+        entity_type: 'TASK',
+        entity_id: task.id,
+        action_route: `/(owner)/tasks/${task.id}`,
+        metadata: { taskId: task.id, title: task.title },
+        dedupe_key: dedupeKey,
+        status: 'UNREAD',
+        read_at: null,
+        resolved_at: null,
+        expires_at: null,
+      });
+      if (created) generatedCount++;
+    }
+
+    const activeCriticalTaskNotifs = await this.db
+      .selectFrom('notifications')
+      .selectAll()
+      .where('organization_id', '=', organizationId)
+      .where('type', '=', 'TASK_CRITICAL')
+      .where('status', 'in', ['UNREAD', 'READ'])
+      .execute();
+
+    for (const notif of activeCriticalTaskNotifs) {
+      if (notif.entity_id && !currentCriticalTaskIds.has(notif.entity_id)) {
+        await this.notificationRepo.resolve(notif.id, organizationId);
+        resolvedCount++;
+      }
+    }
+
     return { generatedCount, resolvedCount };
   }
 }

@@ -43,7 +43,7 @@ interface ExpenseTrackerModalProps {
 
 export function ExpenseTrackerModal({
   visible,
-  totalCollectionsMonth = 85000,
+  totalCollectionsMonth = 0,
   onClose,
   onAddExpense,
 }: ExpenseTrackerModalProps): React.JSX.Element {
@@ -53,36 +53,7 @@ export function ExpenseTrackerModal({
   const [paymentMode, setPaymentMode] = useState('UPI');
   const [notes, setNotes] = useState('');
 
-  // Sample existing logged expenses for real net profit calculation
-  const [expenses, setExpenses] = useState<ExpenseRecord[]>([
-    {
-      id: '1',
-      category: 'RATION_GROCERY',
-      categoryLabel: '🛒 Ration & Groceries',
-      amount: 14500,
-      date: '15 Aug 2026',
-      payeeName: 'Sharma Grocery Store',
-      paymentMode: 'UPI',
-    },
-    {
-      id: '2',
-      category: 'STAFF_SALARY',
-      categoryLabel: '👨‍🍳 Staff / Cook Salary',
-      amount: 18000,
-      date: '10 Aug 2026',
-      payeeName: 'Ramesh Cook & Housekeeper',
-      paymentMode: 'Bank Transfer',
-    },
-    {
-      id: '3',
-      category: 'WIFI_INTERNET',
-      categoryLabel: '📶 Wi-Fi & Internet',
-      amount: 1999,
-      date: '05 Aug 2026',
-      payeeName: 'Airtel Fiber',
-      paymentMode: 'UPI',
-    },
-  ]);
+  const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
 
   const totalExpenseSum = expenses.reduce((sum, item) => sum + item.amount, 0);
   const netProfit = totalCollectionsMonth - totalExpenseSum;
@@ -236,17 +207,23 @@ export function ExpenseTrackerModal({
 
             {/* Recent Logged Expenses List */}
             <Text style={styles.sectionHeader}>RECENT LOGGED EXPENSES</Text>
-            {expenses.map((exp) => (
-              <View key={exp.id} style={styles.expenseItem}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.expTitle}>{exp.categoryLabel}</Text>
-                  <Text style={styles.expSub}>
-                    {exp.payeeName} • {exp.paymentMode} • {exp.date}
-                  </Text>
-                </View>
-                <Text style={styles.expAmount}>- ₹{exp.amount.toLocaleString('en-IN')}</Text>
+            {expenses.length === 0 ? (
+              <View style={styles.emptyWrap}>
+                <Text style={styles.emptyText}>No expenses logged for this period yet.</Text>
               </View>
-            ))}
+            ) : (
+              expenses.map((exp) => (
+                <View key={exp.id} style={styles.expenseItem}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.expTitle}>{exp.categoryLabel}</Text>
+                    <Text style={styles.expSub}>
+                      {exp.payeeName} • {exp.paymentMode} • {exp.date}
+                    </Text>
+                  </View>
+                  <Text style={styles.expAmount}>- ₹{exp.amount.toLocaleString('en-IN')}</Text>
+                </View>
+              ))
+            )}
           </ScrollView>
         </View>
       </View>
@@ -477,5 +454,15 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '800',
     color: '#DC2626',
+  },
+  emptyWrap: {
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    fontStyle: 'italic',
   },
 });

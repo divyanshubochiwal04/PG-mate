@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import type { TaskDto } from '@m-square/contracts';
@@ -24,10 +24,36 @@ export function TaskItemCard({
   isCompleting,
 }: TaskItemCardProps): React.JSX.Element {
   const router = useRouter();
-  const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'COMPLETED';
+  const isOverdue =
+    task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'COMPLETED';
+
+  const priorityColor =
+    task.priority === 'CRITICAL'
+      ? colors.danger
+      : task.priority === 'HIGH'
+      ? '#EA580C'
+      : task.priority === 'MEDIUM'
+      ? colors.primary
+      : colors.textSecondary;
+
+  const handleShare = async () => {
+    const text =
+      `📋 *PG.mate Operational Task*\n` +
+      `📌 *Title*: ${task.title}\n` +
+      `⚡ *Priority*: ${task.priority}\n` +
+      `📊 *Status*: ${task.status.replace('_', ' ')}\n` +
+      (task.dueDate ? `📅 *Due*: ${new Date(task.dueDate).toLocaleDateString()}\n` : '') +
+      (task.description ? `📝 *Notes*: ${task.description}\n` : '');
+
+    try {
+      await Share.share({ message: text });
+    } catch {
+      // Ignored
+    }
+  };
 
   return (
-    <Card style={styles.taskCard}>
+    <Card style={[styles.taskCard, { borderLeftColor: priorityColor, borderLeftWidth: 4 }]}>
       <TouchableOpacity
         onPress={() => router.push(`/(owner)/tasks/${task.id}` as never)}
         activeOpacity={0.7}
@@ -49,22 +75,34 @@ export function TaskItemCard({
             status={task.priority === 'CRITICAL' ? 'DANGER' : task.priority === 'HIGH' ? 'WARNING' : 'INFO'}
             label={task.priority}
           />
+
           {Boolean(task.dueDate) && (
-            <View style={styles.dueTag}>
+            <View style={[styles.dueTag, isOverdue && styles.dueTagOverdue]}>
               <Ionicons
                 name="time-outline"
                 size={12}
                 color={isOverdue ? colors.danger : colors.textSecondary}
               />
               <Text style={[styles.dueText, isOverdue && styles.overdueText]}>
-                Due {new Date(task.dueDate!).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                {isOverdue ? 'Overdue: ' : 'Due: '}
+                {new Date(task.dueDate!).toLocaleDateString('en-GB', {
+                  day: '2-digit',
+                  month: 'short',
+                })}
               </Text>
+            </View>
+          )}
+
+          {Boolean(task.residentId) && (
+            <View style={styles.residentTag}>
+              <Ionicons name="person-outline" size={11} color={colors.primary} />
+              <Text style={styles.residentTagText}>Linked Resident</Text>
             </View>
           )}
         </View>
       </TouchableOpacity>
 
-      {/* Inline Quick Action */}
+      {/* Inline Quick Actions */}
       <View style={styles.taskActions}>
         {task.status === 'TODO' && (
           <Button
@@ -86,6 +124,13 @@ export function TaskItemCard({
             style={{ flex: 1 }}
           />
         )}
+        <TouchableOpacity
+          style={styles.shareBtn}
+          onPress={handleShare}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Ionicons name="share-social-outline" size={18} color={colors.textSecondary} />
+        </TouchableOpacity>
       </View>
     </Card>
   );
@@ -97,7 +142,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: '#E2E8F0',
     marginBottom: spacing.sm,
   },
   taskHeader: {
@@ -118,27 +163,63 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    flexWrap: 'wrap',
+    gap: spacing.xs,
     marginTop: spacing.xs,
   },
   dueTag: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: radius.pill,
+  },
+  dueTagOverdue: {
+    backgroundColor: '#FEE2E2',
   },
   dueText: {
-    ...typography.caption,
+    fontSize: 11,
     color: colors.textSecondary,
+    fontWeight: '600',
   },
   overdueText: {
     color: colors.danger,
     fontWeight: '700',
   },
+  residentTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: radius.pill,
+  },
+  residentTagText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.primary,
+  },
   taskActions: {
     flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingTop: spacing.xs,
+    borderTopColor: '#F1F5F9',
+    paddingTop: spacing.xs + 2,
     marginTop: spacing.sm,
   },
+  shareBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#F8FAFC',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
 });
+

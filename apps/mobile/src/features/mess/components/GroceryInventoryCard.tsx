@@ -29,55 +29,7 @@ export function GroceryInventoryCard({
   initialItems,
   onLowStockAlert,
 }: GroceryInventoryCardProps): React.JSX.Element {
-  const [items, setItems] = useState<GroceryStockItem[]>(
-    initialItems || [
-      {
-        id: '1',
-        name: 'Wheat Aata (Flour)',
-        category: 'GRAINS',
-        currentQty: 45,
-        minThreshold: 20,
-        unit: 'Kg',
-        lastRestocked: '12 Aug',
-      },
-      {
-        id: '2',
-        name: 'Basmati Rice',
-        category: 'GRAINS',
-        currentQty: 12,
-        minThreshold: 25,
-        unit: 'Kg',
-        lastRestocked: '08 Aug',
-      },
-      {
-        id: '3',
-        name: 'Mustard Cooking Oil',
-        category: 'OILS',
-        currentQty: 5,
-        minThreshold: 10,
-        unit: 'Litre',
-        lastRestocked: '05 Aug',
-      },
-      {
-        id: '4',
-        name: 'Commercial LPG Cylinder',
-        category: 'FUEL',
-        currentQty: 1,
-        minThreshold: 2,
-        unit: 'Cylinder',
-        lastRestocked: '01 Aug',
-      },
-      {
-        id: '5',
-        name: 'Fresh Paneer / Dairy',
-        category: 'DAIRY',
-        currentQty: 8,
-        minThreshold: 4,
-        unit: 'Kg',
-        lastRestocked: 'Today',
-      },
-    ]
-  );
+  const [items, setItems] = useState<GroceryStockItem[]>(initialItems || []);
 
   const [activeItemForAdjust, setActiveItemForAdjust] = useState<string | null>(null);
   const [adjustAmount, setAdjustAmount] = useState('5');
@@ -124,78 +76,84 @@ export function GroceryInventoryCard({
       </View>
 
       {/* Stock Items List */}
-      <View style={styles.itemsList}>
-        {items.map((item) => {
-          const isLow = item.currentQty <= item.minThreshold;
-          const isAdjusting = activeItemForAdjust === item.id;
+      {items.length === 0 ? (
+        <View style={styles.emptyWrap}>
+          <Text style={styles.emptyText}>No quick grocery stock items logged.</Text>
+        </View>
+      ) : (
+        <View style={styles.itemsList}>
+          {items.map((item) => {
+            const isLow = item.currentQty <= item.minThreshold;
+            const isAdjusting = activeItemForAdjust === item.id;
 
-          return (
-            <View key={item.id} style={[styles.stockRow, isLow && styles.stockRowLow]}>
-              <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <Text style={styles.itemName}>{item.name}</Text>
-                  {isLow && (
-                    <View style={styles.lowBadge}>
-                      <Text style={styles.lowBadgeText}>⚠️ RESTOCK NEEDED</Text>
-                    </View>
-                  )}
-                </View>
-                <Text style={styles.itemMeta}>
-                  Min Alert: {item.minThreshold} {item.unit} • Last restocked {item.lastRestocked}
-                </Text>
-              </View>
-
-              {/* Qty & Actions */}
-              <View style={styles.rightActions}>
-                <View style={[styles.qtyBox, isLow ? styles.qtyBoxRed : styles.qtyBoxGreen]}>
-                  <Text style={[styles.qtyNum, isLow ? styles.textRed : styles.textGreen]}>
-                    {item.currentQty}
-                  </Text>
-                  <Text style={[styles.qtyUnit, isLow ? styles.textRed : styles.textGreen]}>
-                    {item.unit}
+            return (
+              <View key={item.id} style={[styles.stockRow, isLow && styles.stockRowLow]}>
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Text style={styles.itemName}>{item.name}</Text>
+                    {isLow && (
+                      <View style={styles.lowBadge}>
+                        <Text style={styles.lowBadgeText}>⚠️ RESTOCK NEEDED</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.itemMeta}>
+                    Min Alert: {item.minThreshold} {item.unit} • Last restocked {item.lastRestocked}
                   </Text>
                 </View>
 
-                <TouchableOpacity
-                  style={styles.quickBtn}
-                  onPress={() => setActiveItemForAdjust(isAdjusting ? null : item.id)}
-                >
-                  <Ionicons
-                    name={isAdjusting ? 'close-circle' : 'create-outline'}
-                    size={18}
-                    color={colors.primary}
-                  />
-                </TouchableOpacity>
-              </View>
+                {/* Qty & Actions */}
+                <View style={styles.rightActions}>
+                  <View style={[styles.qtyBox, isLow ? styles.qtyBoxRed : styles.qtyBoxGreen]}>
+                    <Text style={[styles.qtyNum, isLow ? styles.textRed : styles.textGreen]}>
+                      {item.currentQty}
+                    </Text>
+                    <Text style={[styles.qtyUnit, isLow ? styles.textRed : styles.textGreen]}>
+                      {item.unit}
+                    </Text>
+                  </View>
 
-              {/* Expandable Adjust Box */}
-              {isAdjusting && (
-                <View style={styles.adjustTray}>
-                  <Text style={styles.adjustLabel}>QUICK UPDATE ({item.unit}):</Text>
-                  <TextInput
-                    style={styles.adjustInput}
-                    keyboardType="numeric"
-                    value={adjustAmount}
-                    onChangeText={setAdjustAmount}
-                  />
                   <TouchableOpacity
-                    style={styles.addBtn}
-                    onPress={() => handleAdjust(item.id, 'ADD')}
+                    style={styles.quickBtn}
+                    onPress={() => setActiveItemForAdjust(isAdjusting ? null : item.id)}
                   >
-                    <Text style={styles.btnText}>+ Restock</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.subBtn}
-                    onPress={() => handleAdjust(item.id, 'SUB')}
-                  >
-                    <Text style={styles.btnText}>- Used</Text>
+                    <Ionicons
+                      name={isAdjusting ? 'close-circle' : 'create-outline'}
+                      size={18}
+                      color={colors.primary}
+                    />
                   </TouchableOpacity>
                 </View>
-              )}
-            </View>
-          );
-        })}
-      </View>
+
+                {/* Expandable Adjust Box */}
+                {isAdjusting && (
+                  <View style={styles.adjustTray}>
+                    <Text style={styles.adjustLabel}>QUICK UPDATE ({item.unit}):</Text>
+                    <TextInput
+                      style={styles.adjustInput}
+                      keyboardType="numeric"
+                      value={adjustAmount}
+                      onChangeText={setAdjustAmount}
+                    />
+                    <TouchableOpacity
+                      style={styles.addBtn}
+                      onPress={() => handleAdjust(item.id, 'ADD')}
+                    >
+                      <Text style={styles.btnText}>+ Restock</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.subBtn}
+                      onPress={() => handleAdjust(item.id, 'SUB')}
+                    >
+                      <Text style={styles.btnText}>- Used</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 }
@@ -335,5 +293,15 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
     color: '#FFFFFF',
+  },
+  emptyWrap: {
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    fontStyle: 'italic',
   },
 });

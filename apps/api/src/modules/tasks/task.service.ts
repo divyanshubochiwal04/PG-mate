@@ -52,6 +52,12 @@ export class TaskService {
     };
   }
 
+  private extractUserId(userOrId: any): string {
+    if (!userOrId) return '';
+    if (typeof userOrId === 'object' && userOrId.id) return String(userOrId.id);
+    return String(userOrId);
+  }
+
   private mapActivityToDto(row: TaskActivityRow): TaskActivityDto {
     return {
       id: row.id,
@@ -153,6 +159,7 @@ export class TaskService {
     dto: CreateTaskDto
   ): Promise<TaskDto> {
     await this.validateLinkedEntities(organizationId, dto);
+    const userId = this.extractUserId(createdByUserId);
 
     return this.unitOfWork.runInTransaction(async (trx) => {
       if (dto.notificationId) {
@@ -179,7 +186,7 @@ export class TaskService {
           completed_at: null,
           cancelled_at: null,
           assigned_to_user_id: dto.assignedToUserId || null,
-          created_by_user_id: createdByUserId,
+          created_by_user_id: userId,
           resident_id: dto.residentId || null,
           invoice_id: dto.invoiceId || null,
           payment_id: dto.paymentId || null,
@@ -198,7 +205,7 @@ export class TaskService {
           action: 'CREATED',
           previous_status: null,
           new_status: 'TODO',
-          performed_by_user_id: createdByUserId,
+          performed_by_user_id: userId,
           note: `Task created: ${dto.title}`,
         },
         trx
@@ -235,6 +242,7 @@ export class TaskService {
     userId: string,
     dto: UpdateTaskDto
   ): Promise<TaskDto> {
+    const cleanUserId = this.extractUserId(userId);
     return this.unitOfWork.runInTransaction(async (trx) => {
       const existing = await this.taskRepo.findByIdForUpdate(id, organizationId, trx);
       if (!existing) throw new NotFoundException(`Task with ID ${id} not found`);
@@ -276,7 +284,7 @@ export class TaskService {
           action: 'UPDATED',
           previous_status: existing.status,
           new_status: updated.status,
-          performed_by_user_id: userId,
+          performed_by_user_id: cleanUserId,
           note: 'Task details updated',
         },
         trx
@@ -287,6 +295,7 @@ export class TaskService {
   }
 
   public async startTask(id: string, organizationId: string, userId: string): Promise<TaskDto> {
+    const cleanUserId = this.extractUserId(userId);
     return this.unitOfWork.runInTransaction(async (trx) => {
       const existing = await this.taskRepo.findByIdForUpdate(id, organizationId, trx);
       if (!existing) throw new NotFoundException(`Task with ID ${id} not found`);
@@ -311,7 +320,7 @@ export class TaskService {
           action: 'STARTED',
           previous_status: existing.status,
           new_status: 'IN_PROGRESS',
-          performed_by_user_id: userId,
+          performed_by_user_id: cleanUserId,
           note: 'Task started',
         },
         trx
@@ -322,6 +331,7 @@ export class TaskService {
   }
 
   public async completeTask(id: string, organizationId: string, userId: string): Promise<TaskDto> {
+    const cleanUserId = this.extractUserId(userId);
     return this.unitOfWork.runInTransaction(async (trx) => {
       const existing = await this.taskRepo.findByIdForUpdate(id, organizationId, trx);
       if (!existing) throw new NotFoundException(`Task with ID ${id} not found`);
@@ -345,7 +355,7 @@ export class TaskService {
           action: 'COMPLETED',
           previous_status: existing.status,
           new_status: 'COMPLETED',
-          performed_by_user_id: userId,
+          performed_by_user_id: cleanUserId,
           note: 'Task marked as completed',
         },
         trx
@@ -356,6 +366,7 @@ export class TaskService {
   }
 
   public async cancelTask(id: string, organizationId: string, userId: string): Promise<TaskDto> {
+    const cleanUserId = this.extractUserId(userId);
     return this.unitOfWork.runInTransaction(async (trx) => {
       const existing = await this.taskRepo.findByIdForUpdate(id, organizationId, trx);
       if (!existing) throw new NotFoundException(`Task with ID ${id} not found`);
@@ -379,7 +390,7 @@ export class TaskService {
           action: 'CANCELLED',
           previous_status: existing.status,
           new_status: 'CANCELLED',
-          performed_by_user_id: userId,
+          performed_by_user_id: cleanUserId,
           note: 'Task cancelled',
         },
         trx
@@ -390,18 +401,19 @@ export class TaskService {
   }
 
   public async reopenTask(id: string, organizationId: string, userId: string): Promise<TaskDto> {
+    const cleanUserId = this.extractUserId(userId);
     return this.unitOfWork.runInTransaction(async (trx) => {
       const existing = await this.taskRepo.findByIdForUpdate(id, organizationId, trx);
       if (!existing) throw new NotFoundException(`Task with ID ${id} not found`);
 
       if (existing.status === 'TODO' || existing.status === 'IN_PROGRESS') {
-        throw new BadRequestException(`Task is already active in state ${existing.status}`);
+        throw new BadRequestException('Only completed or cancelled tasks can be reopened');
       }
 
       const updated = await this.taskRepo.updateForOrganization(
         id,
         organizationId,
-        { status: 'TODO' },
+        { status: 'TODO', completed_at: null, cancelled_at: null },
         trx
       );
       if (!updated) throw new NotFoundException(`Task with ID ${id} not found`);
@@ -413,7 +425,7 @@ export class TaskService {
           action: 'REOPENED',
           previous_status: existing.status,
           new_status: 'TODO',
-          performed_by_user_id: userId,
+          performed_by_user_id: cleanUserId,
           note: 'Task reopened',
         },
         trx
@@ -429,9 +441,14 @@ export class TaskService {
     userId: string,
     dto: AssignTaskDto
   ): Promise<TaskDto> {
+    const cleanUserId = this.extractUserId(userId);
     return this.unitOfWork.runInTransaction(async (trx) => {
       const existing = await this.taskRepo.findByIdForUpdate(id, organizationId, trx);
       if (!existing) throw new NotFoundException(`Task with ID ${id} not found`);
+
+      if (existing.status === 'COMPLETED' || existing.status === 'CANCELLED') {
+        throw new BadRequestException(`Cannot assign historical task in state ${existing.status}`);
+      }
 
       if (dto.assignedToUserId) {
         const member = await trx
@@ -451,16 +468,15 @@ export class TaskService {
       );
       if (!updated) throw new NotFoundException(`Task with ID ${id} not found`);
 
-      const action = dto.assignedToUserId ? 'ASSIGNED' : 'UNASSIGNED';
       await this.taskRepo.createActivity(
         {
           task_id: id,
           organization_id: organizationId,
-          action,
+          action: 'ASSIGNED',
           previous_status: existing.status,
-          new_status: existing.status,
-          performed_by_user_id: userId,
-          note: dto.assignedToUserId ? `Assigned to user ${dto.assignedToUserId}` : 'Unassigned task',
+          new_status: updated.status,
+          performed_by_user_id: cleanUserId,
+          note: dto.assignedToUserId ? `Task assigned to user ${dto.assignedToUserId}` : 'Task unassigned',
         },
         trx
       );

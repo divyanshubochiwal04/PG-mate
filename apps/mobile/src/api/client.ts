@@ -43,13 +43,21 @@ apiClient.interceptors.request.use(async (config) => {
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  console.log(`📡 [API REQUEST] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`, config.data ? JSON.stringify(config.data) : '');
   return config;
 });
 
-// Response Interceptor — handles 401 token refresh mutex queue
+// Response Interceptor — handles 401 token refresh mutex queue & logs errors
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(`✅ [API RESPONSE ${response.status}] ${response.config.method?.toUpperCase()} ${response.config.url}`);
+    return response;
+  },
   async (error) => {
+    console.error(
+      `❌ [API ERROR ${error.response?.status || 'NO_RESP'}] ${error.config?.method?.toUpperCase()} ${error.config?.url}:`,
+      error.response?.data ? JSON.stringify(error.response.data) : error.message
+    );
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {

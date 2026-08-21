@@ -54,6 +54,13 @@ export class NotificationService {
       }
     }
 
+    // Auto-detect and sync real-time reminders for rent dues, tasks, invoices, and stock
+    try {
+      await this.detectorService.generateOperationalNotifications(organizationId);
+    } catch (detectorErr) {
+      console.warn('Notification auto-detector warning:', detectorErr);
+    }
+
     const { data, total, page, pageSize, totalPages } =
       await this.notificationRepo.findByOrganization(organizationId, query);
     const unreadCount = await this.notificationRepo.countUnread(organizationId);
@@ -80,6 +87,11 @@ export class NotificationService {
   }
 
   public async getUnreadCount(organizationId: string): Promise<{ count: number }> {
+    try {
+      await this.detectorService.generateOperationalNotifications(organizationId);
+    } catch {
+      // Ignore detector errors on count
+    }
     const count = await this.notificationRepo.countUnread(organizationId);
     return { count };
   }

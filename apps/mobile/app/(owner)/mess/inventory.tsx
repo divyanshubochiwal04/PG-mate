@@ -38,9 +38,9 @@ export default function KitchenInventoryScreen(): React.JSX.Element {
   const [name, setName] = useState('');
   const [category, setCategory] = useState('GRAINS');
   const [unit, setUnit] = useState('kg');
-  const [currentStockStr, setCurrentStockStr] = useState('50');
-  const [minimumStockStr, setMinimumStockStr] = useState('10');
-  const [reorderLevelStr, setReorderLevelStr] = useState('15');
+  const [currentStockStr, setCurrentStockStr] = useState('');
+  const [minimumStockStr, setMinimumStockStr] = useState('');
+  const [reorderLevelStr, setReorderLevelStr] = useState('');
 
   // Modals
   const [selectedItemForAdjust, setSelectedItemForAdjust] = useState<any | null>(null);
@@ -141,8 +141,8 @@ export default function KitchenInventoryScreen(): React.JSX.Element {
             <TextInput label="Item Name *" value={name} onChangeText={setName} placeholder="e.g. Basmati Rice" />
             <TextInput label="Category" value={category} onChangeText={setCategory} placeholder="e.g. GRAINS, DAIRY, VEGETABLES" />
             <TextInput label="Unit *" value={unit} onChangeText={setUnit} placeholder="e.g. kg, litre, pack" />
-            <TextInput label="Initial Stock" value={currentStockStr} onChangeText={setCurrentStockStr} keyboardType="numeric" />
-            <TextInput label="Reorder Threshold" value={reorderLevelStr} onChangeText={setReorderLevelStr} keyboardType="numeric" />
+            <TextInput label="Initial Stock" value={currentStockStr} onChangeText={setCurrentStockStr} keyboardType="numeric" placeholder="e.g. 50" />
+            <TextInput label="Reorder Threshold" value={reorderLevelStr} onChangeText={setReorderLevelStr} keyboardType="numeric" placeholder="e.g. 15" />
             <View style={styles.modalBtnRow}>
               <Button title="Cancel" variant="outline" onPress={() => setShowAddModal(false)} style={{ flex: 1 }} />
               <Button title="Save Item" onPress={handleCreateItem} style={{ flex: 1 }} />

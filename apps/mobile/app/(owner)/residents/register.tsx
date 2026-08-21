@@ -89,8 +89,8 @@ export default function RegisterResidentWizardScreen(): React.JSX.Element {
   const [selectedFacilityIds, setSelectedFacilityIds] = useState<string[]>([]);
 
   // Step 6 — Pricing State
-  const [baseRentStr, setBaseRentStr] = useState('8000');
-  const [depositStr, setDepositStr] = useState('8000');
+  const [baseRentStr, setBaseRentStr] = useState('');
+  const [depositStr, setDepositStr] = useState('');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('JOINING_DATE');
   const [extraChargeDesc, setExtraChargeDesc] = useState('');
   const [extraChargeAmount, setExtraChargeAmount] = useState('');
@@ -542,6 +542,7 @@ export default function RegisterResidentWizardScreen(): React.JSX.Element {
               }}
               error={errors['baseRent']}
               keyboardType="numeric"
+              placeholder="e.g. 8000"
             />
             <TextInput
               label="Security Deposit (₹)"
@@ -552,6 +553,7 @@ export default function RegisterResidentWizardScreen(): React.JSX.Element {
               }}
               error={errors['deposit']}
               keyboardType="numeric"
+              placeholder="e.g. 8000"
             />
 
             <Text style={styles.label}>Billing Cycle</Text>

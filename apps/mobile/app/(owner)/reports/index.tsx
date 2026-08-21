@@ -189,11 +189,11 @@ export default function ReportsHubScreen(): React.JSX.Element {
 
         {/* Predictive Revenue & Vacancy Forecast Card */}
         <RevenueForecastCard
-          currentMonthlyRevenue={128000}
-          maxPotentialRevenue={160000}
-          occupancyPercentage={dashboard?.occupancy?.occupancyPercentage || 80}
-          upcomingCheckoutsCount={2}
-          overdueAtRiskAmount={14000}
+          currentMonthlyRevenue={dashboard?.billing?.totalCollected || 0}
+          maxPotentialRevenue={dashboard?.billing?.totalInvoiced || 0}
+          occupancyPercentage={dashboard?.occupancy?.occupancyPercentage || 0}
+          upcomingCheckoutsCount={dashboard?.residents?.checkoutsInPeriod || 0}
+          overdueAtRiskAmount={dashboard?.billing?.overdueAmount || dashboard?.billing?.totalOutstanding || 0}
         />
 
         {/* EXECUTIVE OVERVIEW CHART */}

@@ -35,14 +35,14 @@ export function ElectricityCalculatorModal({
   visible,
   roomNumber,
   occupants = [],
-  propertyName = 'PG.mate',
+  propertyName = 'Property Management',
   onClose,
   onApplySplitCharges,
   onSendInAppNotification,
 }: ElectricityCalculatorModalProps): React.JSX.Element {
-  const [prevReading, setPrevReading] = useState('1200');
-  const [currReading, setCurrReading] = useState('1350');
-  const [unitRate, setUnitRate] = useState('10'); // Default ₹10 / unit
+  const [prevReading, setPrevReading] = useState('');
+  const [currReading, setCurrReading] = useState('');
+  const [unitRate, setUnitRate] = useState('');
   const [isApplying, setIsApplying] = useState(false);
 
   const prev = parseFloat(prevReading) || 0;
@@ -148,7 +148,7 @@ export function ElectricityCalculatorModal({
                     keyboardType="numeric"
                     value={prevReading}
                     onChangeText={setPrevReading}
-                    placeholder="0"
+                    placeholder="e.g. 1200"
                   />
                 </View>
                 <View style={{ flex: 1 }}>
@@ -158,7 +158,7 @@ export function ElectricityCalculatorModal({
                     keyboardType="numeric"
                     value={currReading}
                     onChangeText={setCurrReading}
-                    placeholder="0"
+                    placeholder="e.g. 1350"
                   />
                 </View>
               </View>
@@ -170,7 +170,7 @@ export function ElectricityCalculatorModal({
                   keyboardType="numeric"
                   value={unitRate}
                   onChangeText={setUnitRate}
-                  placeholder="10"
+                  placeholder="e.g. 10"
                 />
               </View>
             </View>

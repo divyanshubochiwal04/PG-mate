@@ -6,6 +6,8 @@ export type NotificationType =
   | 'NO_STAY'
   | 'UPCOMING_CHECKOUT'
   | 'HIGH_OCCUPANCY'
+  | 'TASK_OVERDUE'
+  | 'TASK_CRITICAL'
   | 'PAYMENT_RECEIVED'
   | 'RESIDENT_CHECKED_IN'
   | 'RESIDENT_TRANSFERRED'
@@ -27,6 +29,7 @@ export type NotificationEntityType =
   | 'BUILDING'
   | 'PROCUREMENT'
   | 'EXPENSE'
+  | 'TASK'
   | 'SYSTEM';
 
 export interface NotificationDto {

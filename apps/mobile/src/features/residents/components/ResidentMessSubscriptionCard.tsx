@@ -80,7 +80,7 @@ export function ResidentMessSubscriptionCard({
 
         <View style={styles.infoRow}>
           <Text style={styles.label}>Dining Hall</Text>
-          <Text style={styles.value}>{sub.messName || 'Central Dining Hall'}</Text>
+          <Text style={styles.value}>{sub.messName || 'Mess Dining'}</Text>
         </View>
 
         <View style={styles.infoRow}>

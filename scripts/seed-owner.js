@@ -67,10 +67,18 @@ async function seed() {
   `);
   console.log('Database tables verified.');
 
-  const email = 'owner@example.com';
-  const password = 'Password123!';
+  const email = (process.env.OWNER_EMAIL || process.env.SEED_OWNER_EMAIL || process.argv[2] || '').trim();
+  const password = process.env.OWNER_PASSWORD || process.env.SEED_OWNER_PASSWORD || process.argv[3] || '';
+  const orgName = (process.env.OWNER_ORG_NAME || process.env.SEED_ORG_NAME || process.argv[4] || 'PG Owner Organization').trim();
 
-  // Check if owner@example.com exists
+  if (!email || !password) {
+    console.error('Error: Please provide OWNER_EMAIL and OWNER_PASSWORD environment variables (or CLI args).');
+    console.error('Usage: OWNER_EMAIL=your@email.com OWNER_PASSWORD=YourPassword node scripts/seed-owner.js');
+    await pool.end();
+    process.exit(1);
+  }
+
+  // Check if user already exists
   const existingRes = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
   if (existingRes.rows.length > 0) {
     console.log(`User ${email} already exists in database.`);
@@ -93,10 +101,12 @@ async function seed() {
   );
   const userId = userRes.rows[0].id;
 
+  const orgSlug = `org-${email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now().toString(36)}`;
+
   // Insert organization
   const orgRes = await pool.query(
     'INSERT INTO organizations (name, slug, status) VALUES ($1, $2, $3) RETURNING id',
-    ['PG Owner Organization', 'org-owner-example', 'ACTIVE']
+    [orgName, orgSlug, 'ACTIVE']
   );
   const orgId = orgRes.rows[0].id;
 

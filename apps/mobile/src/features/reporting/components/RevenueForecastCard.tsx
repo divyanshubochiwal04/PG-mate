@@ -12,11 +12,11 @@ interface RevenueForecastCardProps {
 }
 
 export function RevenueForecastCard({
-  currentMonthlyRevenue = 142000,
-  maxPotentialRevenue = 180000,
-  occupancyPercentage = 82,
-  upcomingCheckoutsCount = 3,
-  overdueAtRiskAmount = 14500,
+  currentMonthlyRevenue = 0,
+  maxPotentialRevenue = 0,
+  occupancyPercentage = 0,
+  upcomingCheckoutsCount = 0,
+  overdueAtRiskAmount = 0,
 }: RevenueForecastCardProps): React.JSX.Element {
   const projectedLoss = maxPotentialRevenue - currentMonthlyRevenue;
 

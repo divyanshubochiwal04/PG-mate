@@ -70,60 +70,6 @@ const DISH_PRESETS = [
   'Papad & Pickle',
 ];
 
-// ── Default Sample Full Week Timetable ──
-const DEFAULT_WEEK_MENU_TEMPLATE: Record<string, Record<string, MealBlockData>> = {
-  Mon: {
-    BREAKFAST: { items: ['Poha', 'Boiled Eggs / Sprouts', 'Chai'], notes: 'Healthy start' },
-    LUNCH: { items: ['Rajma Masala', 'Steamed Rice', 'Tawa Roti', 'Boondi Raita', 'Salad'] },
-    SNACKS: { items: ['Biscuits / Rusk', 'Masala Tea'] },
-    DINNER: { items: ['Aloo Gobi Matar', 'Dal Tadka', 'Phulka Roti', 'Jeera Rice'] },
-  },
-  Tue: {
-    BREAKFAST: { items: ['Idli Sambar', 'Coconut Chutney', 'Filter Coffee'] },
-    LUNCH: { items: ['Kadhi Pakoda', 'Steamed Rice', 'Phulka Roti', 'Aloo Bhujia'] },
-    SNACKS: { items: ['Veg Puffs', 'Tea'] },
-    DINNER: {
-      items: ['Shahi Paneer', 'Butter Roti', 'Dal Makhani', 'Pulao', 'Gulab Jamun'],
-      isSpecial: true,
-      notes: 'Paneer Feast Tuesday',
-    },
-  },
-  Wed: {
-    BREAKFAST: { items: ['Methi Paratha', 'Curd', 'Mango Pickle', 'Chai'] },
-    LUNCH: { items: ['Chole Masala', 'Bhature / Roti', 'Jeera Rice', 'Onion Salad'] },
-    SNACKS: { items: ['Sweet Corn', 'Masala Tea'] },
-    DINNER: { items: ['Mix Veg Curry', 'Yellow Moong Dal', 'Roti', 'Steamed Rice'] },
-  },
-  Thu: {
-    BREAKFAST: { items: ['Upma & Coconut Chutney', 'Banana', 'Chai'] },
-    LUNCH: { items: ['Dal Palak', 'Jeera Aloo', 'Tawa Roti', 'Rice', 'Cucumber Raita'] },
-    SNACKS: { items: ['Bread Pakoda', 'Mint Chutney', 'Chai'] },
-    DINNER: { items: ['Paneer Do Pyaza', 'Phulka Roti', 'Rice', 'Rice Kheer'], notes: 'Kheer Night' },
-  },
-  Fri: {
-    BREAKFAST: { items: ['Aloo Paratha', 'Amul Butter', 'Pickle', 'Tea'] },
-    LUNCH: { items: ['Dum Veg Biryani', 'Mirchi Ka Salan', 'Veg Raita', 'Papad'] },
-    SNACKS: { items: ['Samosa', 'Chai'] },
-    DINNER: { items: ['Matar Paneer', 'Tawa Roti', 'Dal Fry', 'Jeera Rice'] },
-  },
-  Sat: {
-    BREAKFAST: { items: ['Puri Bhaji', 'Suji Halwa', 'Chai'] },
-    LUNCH: { items: ['Dal Baati Churma', 'Gatta Curry', 'Papad', 'Pickle'], isSpecial: true },
-    SNACKS: { items: ['Poha Cutlet', 'Chai'] },
-    DINNER: { items: ['Pav Bhaji', 'Butter Pav', 'Tawa Pulao', 'Ice Cream'] },
-  },
-  Sun: {
-    BREAKFAST: { items: ['Masala Dosa', 'Sambar', 'Coconut Chutney', 'Filter Coffee'], isSpecial: true },
-    LUNCH: {
-      items: ['Paneer Butter Masala', 'Butter Naan / Puri', 'Dal Makhani', 'Kashmiri Pulao', 'Rasgulla'],
-      isSpecial: true,
-      notes: '⭐ Alt Weeks: Week 1 Paneer Butter Masala / Week 2 Shahi Kheer & Puri',
-    },
-    SNACKS: { items: ['Cookies & Chai'] },
-    DINNER: { items: ['Chinese Fried Rice', 'Veg Manchurian', 'Soup'], notes: 'Light Indo-Chinese' },
-  },
-};
-
 const DEFAULT_MEAL_SESSIONS = [
   { id: 'BREAKFAST', name: 'Breakfast', startTime: '07:30', endTime: '09:30', icon: 'sunny-outline', color: '#F59E0B' },
   { id: 'LUNCH', name: 'Lunch', startTime: '12:30', endTime: '14:30', icon: 'restaurant-outline', color: '#10B981' },
@@ -158,9 +104,7 @@ export default function MenuManagementScreen(): React.JSX.Element {
   const [activeDayIndex, setActiveDayIndex] = useState(0);
 
   // Full Weekly Schedule Store: dayShort -> Record<mealTypeId, MealBlockData>
-  const [weeklySchedule, setWeeklySchedule] = useState<Record<string, Record<string, MealBlockData>>>(
-    DEFAULT_WEEK_MENU_TEMPLATE
-  );
+  const [weeklySchedule, setWeeklySchedule] = useState<Record<string, Record<string, MealBlockData>>>({});
 
   // Edit Modal State
   const [editingCell, setEditingCell] = useState<{
